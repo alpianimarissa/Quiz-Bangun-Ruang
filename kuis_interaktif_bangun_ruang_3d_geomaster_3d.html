@@ -1,0 +1,2171 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Interaktif Bangun Ruang 3D</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- KaTeX CSS & JS untuk Rendering Matematika Sempurna -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* Transisi SVG */
+    .svg-container svg {
+      transition: all 0.3s ease;
+    }
+    /* Penyesuaian tampilan KaTeX */
+    .katex {
+      font-size: 1.05em;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-indigo-600 text-white p-2.5 rounded-xl shadow-md shadow-indigo-100 flex items-center justify-center">
+          <i class="fa-solid fa-cubes text-xl animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold text-slate-900 tracking-tight">GeoMaster 3D</h1>
+          <p class="text-xs text-slate-500 font-medium">Kuis Interaktif Bangun Ruang • 40 Soal Kreatif &amp; Advance</p>
+        </div>
+      </div>
+      <!-- Progress Ring & Score Bar -->
+      <div class="flex items-center gap-6 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-100">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500">Skor:</span>
+          <span id="score-badge" class="mono text-sm font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-lg">0 / 40</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-semibold text-slate-500">Progress:</span>
+          <div class="w-24 bg-slate-200 rounded-full h-2">
+            <div id="progress-bar-inner" class="bg-emerald-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+          </div>
+          <span id="progress-percentage" class="mono text-xs font-bold text-slate-700">0%</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Workspace -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 sm:px-6 lg:px-8 flex flex-col lg:flex-row gap-6 items-start">
+    
+    <!-- Left Panel: Sidebar Grid Soal (Sticky) -->
+    <aside class="w-full lg:w-80 shrink-0 bg-white border border-slate-200 rounded-2xl p-5 shadow-sm sticky lg:top-24">
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="font-bold text-slate-900 flex items-center gap-2">
+          <i class="fa-solid fa-list-ol text-indigo-500"></i> Daftar Soal
+        </h3>
+        <button onclick="openResetModal()" class="text-xs font-semibold text-rose-500 hover:text-rose-700 transition flex items-center gap-1">
+          <i class="fa-solid fa-rotate-left"></i> Reset Kuis
+        </button>
+      </div>
+
+      <!-- Keterangan Status Warna -->
+      <div class="grid grid-cols-2 gap-2 mb-4 p-3 bg-slate-50 rounded-xl border border-slate-100">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-3 h-3 rounded-full bg-slate-200 border border-slate-300 inline-block"></span>
+          <span class="text-slate-600">Belum diisi</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+          <span class="text-slate-600">Belum dicek</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+          <span class="text-slate-600">Benar</span>
+        </div>
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+          <span class="text-slate-600">Salah</span>
+        </div>
+      </div>
+
+      <!-- Grid Buttons -->
+      <div class="grid grid-cols-5 gap-2 max-h-[340px] overflow-y-auto pr-1" id="question-tabs-grid">
+        <!-- Generated Dynamically by JS -->
+      </div>
+
+      <!-- Quick Summary Card -->
+      <div class="mt-5 pt-4 border-t border-slate-100 flex flex-col gap-2">
+        <div class="flex justify-between text-xs text-slate-600">
+          <span>Tingkat Mudah:</span>
+          <span class="font-bold text-slate-800">12 Soal</span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-600">
+          <span>Penerapan Praktis:</span>
+          <span class="font-bold text-slate-800">17 Soal</span>
+        </div>
+        <div class="flex justify-between text-xs text-slate-600">
+          <span>Tingkat Tinggi:</span>
+          <span class="font-bold text-slate-800">11 Soal</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center/Right Content Area -->
+    <div class="flex-1 w-full flex flex-col gap-6">
+      
+      <!-- Question Card Wrapper -->
+      <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+        
+        <!-- Left half of Question Card: Schematic Visual Layout -->
+        <div class="w-full md:w-[45%] bg-slate-900 text-white p-6 flex flex-col justify-between relative overflow-hidden border-b md:border-b-0 md:border-r border-slate-800">
+          <!-- Background glow effect -->
+          <div class="absolute -top-24 -left-24 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+          <div class="absolute -bottom-24 -right-24 w-48 h-48 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <!-- Top meta -->
+          <div class="relative z-10 flex justify-between items-center mb-4">
+            <span id="shape-category-badge" class="text-xs font-semibold bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full border border-indigo-500/30">
+              KUBUS
+            </span>
+            <span id="difficulty-badge" class="text-xs font-semibold px-2.5 py-0.5 rounded-full">
+              Mudah
+            </span>
+          </div>
+
+          <!-- Interactive SVG Frame -->
+          <div class="flex-1 flex flex-col items-center justify-center py-4 min-h-[300px] svg-container relative z-10">
+            <div id="svg-drawing-area" class="w-full flex justify-center items-center">
+              <!-- Inline SVG is rendered here -->
+            </div>
+          </div>
+
+          <!-- Schematic info card -->
+          <div class="relative z-10 bg-slate-800/40 p-4 rounded-xl border border-slate-700/30 text-center">
+            <span class="text-xs font-bold text-slate-300 flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-drafting-compass text-sky-400"></i> Ilustrasi Skematis Bangun Ruang
+            </span>
+            <p id="illustration-caption" class="text-[11px] text-slate-400 mt-1">Garis dimensi menunjukkan variabel parameter pada soal.</p>
+          </div>
+        </div>
+
+        <!-- Right half of Question Card: Question content & MCQ options -->
+        <div class="w-full md:w-[55%] p-6 sm:p-8 flex flex-col justify-between">
+          <div>
+            <!-- Question Header -->
+            <div class="flex items-center justify-between mb-4 text-xs font-bold text-slate-400">
+              <span class="mono">SOAL <span id="current-question-num" class="text-indigo-600 text-base">1</span> DARI 40</span>
+              <span id="answer-checked-badge" class="hidden items-center gap-1.5 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-check-double"></i> Selesai Dicek</span>
+            </div>
+
+            <!-- Question Body -->
+            <div class="prose max-w-none text-slate-800 mb-6">
+              <p id="question-text" class="text-base sm:text-lg font-medium leading-relaxed">
+                Memuat soal...
+              </p>
+            </div>
+
+            <!-- Hint Trigger -->
+            <div class="mb-6">
+              <button onclick="toggleHint()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-1.5 transition">
+                <i class="fa-regular fa-lightbulb"></i> Butuh Petunjuk?
+              </button>
+              <div id="hint-box" class="hidden mt-2 p-3 bg-indigo-50/70 border border-indigo-100 rounded-xl text-xs sm:text-sm text-indigo-950 leading-relaxed">
+                <!-- Hint goes here -->
+              </div>
+            </div>
+
+            <!-- MCQ Option Buttons -->
+            <div class="space-y-3" id="options-container">
+              <!-- Dynamically populated options A, B, C, D -->
+            </div>
+          </div>
+
+          <!-- Action Control Bar -->
+          <div class="mt-8 pt-6 border-t border-slate-100 flex items-center justify-between gap-4">
+            <button onclick="prevQuestion()" id="btn-prev" class="px-4 py-2.5 border border-slate-200 text-slate-700 hover:bg-slate-50 font-semibold rounded-xl text-sm transition flex items-center gap-2 disabled:opacity-40">
+              <i class="fa-solid fa-arrow-left"></i> Sblmnya
+            </button>
+            
+            <button onclick="checkAnswer()" id="btn-check" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl shadow-lg shadow-indigo-100 transition duration-150 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fa-solid fa-circle-check"></i> Cek Jawaban
+            </button>
+            
+            <button onclick="nextQuestion()" id="btn-next" class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-semibold rounded-xl text-sm transition flex items-center gap-2 disabled:opacity-40">
+              Selanjutnya <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Pembahasan (Explanation) Section -->
+      <section id="pembahasan-section" class="hidden bg-emerald-50 border border-emerald-200 rounded-2xl p-6 sm:p-8 shadow-sm transition-all duration-300">
+        <div class="flex items-start gap-4">
+          <div class="bg-emerald-600 text-white p-3 rounded-xl shadow-md shadow-emerald-100 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+          </div>
+          <div class="flex-1 overflow-x-auto">
+            <h4 class="text-emerald-950 font-extrabold text-base sm:text-lg mb-2 flex items-center gap-2">
+              Pembahasan &amp; Langkah Solusi
+            </h4>
+            <div id="pembahasan-content" class="text-sm sm:text-base text-emerald-900 leading-relaxed space-y-2">
+              <!-- Discussion content populated dynamically -->
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- Custom Reset Confirmation Modal (Pengganti confirm()) -->
+  <div id="reset-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 transform transition-all">
+      <div class="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center text-xl mb-4 mx-auto">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h3 class="text-lg font-extrabold text-slate-900 text-center mb-2">Reset Kemajuan Kuis?</h3>
+      <p class="text-xs sm:text-sm text-slate-500 text-center mb-6">
+        Seluruh jawaban, skor, dan status pengerjaan pada 40 soal akan dihapus dan diacak ulang.
+      </p>
+      <div class="flex gap-3">
+        <button onclick="closeResetModal()" class="flex-1 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 font-semibold text-sm hover:bg-slate-50 transition">
+          Batal
+        </button>
+        <button onclick="confirmResetQuiz()" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 text-white font-semibold text-sm hover:bg-rose-700 shadow-md shadow-rose-100 transition">
+          Ya, Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-slate-900 text-slate-400 text-center py-6 border-t border-slate-800 mt-12">
+    <div class="max-w-7xl mx-auto px-4 text-xs font-medium">
+      <p class="mb-1">&copy; 2026 GeoMaster 3D. Dibuat khusus untuk penguasaan visualisasi dan hitungan ruang secara mendalam.</p>
+      <p class="text-slate-500">Notasi matematika dirender dengan KaTeX &bull; Ilustrasi presisi sesuai konteks soal.</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Core -->
+  <script>
+    // --- DATABASE SOAL (40 SOAL LENGKAP DENGAN KATEX & ILUSTRASI AKURAT) ---
+    const questions = [
+      // KUBUS & BALOK (Mudah)
+      {
+        id: 1,
+        category: "KUBUS",
+        difficulty: "Mudah",
+        type: "kubus",
+        caption: "Kubus dengan panjang rusuk s",
+        question: "Sebuah kubus memiliki panjang rusuk $s = 8\\text{ cm}$. Berapakah volume dan luas permukaan kubus tersebut?",
+        options: [
+          "Volume $= 512\\text{ cm}^3$ dan Luas Permukaan $= 384\\text{ cm}^2$",
+          "Volume $= 384\\text{ cm}^3$ dan Luas Permukaan $= 512\\text{ cm}^2$",
+          "Volume $= 512\\text{ cm}^3$ dan Luas Permukaan $= 256\\text{ cm}^2$",
+          "Volume $= 256\\text{ cm}^3$ dan Luas Permukaan $= 384\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Volume kubus dirumuskan $V = s^3$ sedangkan luas permukaan $L = 6s^2$. Kuadratkan dan pangkatkan tiga angka $8$.",
+        explanation: "Volume kubus: $V = s^3 = 8^3 = 512\\text{ cm}^3$.<br>Luas Permukaan: $L = 6s^2 = 6 \\times 8^2 = 6 \\times 64 = 384\\text{ cm}^2$."
+      },
+      {
+        id: 2,
+        category: "BALOK",
+        difficulty: "Mudah",
+        type: "balok",
+        caption: "Balok dengan panjang p, lebar l, dan tinggi t",
+        question: "Sebuah balok memiliki ukuran panjang $p = 12\\text{ cm}$, lebar $l = 6\\text{ cm}$, dan tinggi $t = 5\\text{ cm}$. Berapakah volume dan luas permukaan balok tersebut?",
+        options: [
+          "Volume $= 360\\text{ cm}^3$ dan Luas Permukaan $= 324\\text{ cm}^2$",
+          "Volume $= 324\\text{ cm}^3$ dan Luas Permukaan $= 360\\text{ cm}^2$",
+          "Volume $= 360\\text{ cm}^3$ dan Luas Permukaan $= 162\\text{ cm}^2$",
+          "Volume $= 180\\text{ cm}^3$ dan Luas Permukaan $= 324\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan rumus Volume $V = p \\times l \\times t$ dan Luas Permukaan $L = 2(pl + pt + lt)$.",
+        explanation: "Volume: $V = 12 \\times 6 \\times 5 = 360\\text{ cm}^3$.<br>Luas permukaan: $L = 2(pl + pt + lt) = 2(12\\times 6 + 12\\times 5 + 6\\times 5) = 2(72 + 60 + 30) = 2 \\times 162 = 324\\text{ cm}^2$."
+      },
+      {
+        id: 3,
+        category: "TABUNG",
+        difficulty: "Mudah",
+        type: "tabung",
+        caption: "Tabung tertutup dengan jari-jari r dan tinggi t",
+        question: "Sebuah tabung memiliki jari-jari alas $r = 14\\text{ cm}$ dan tinggi $t = 10\\text{ cm}$. Berapakah volume tabung tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Volume $= 6.160\\text{ cm}^3$",
+          "Volume $= 3.080\\text{ cm}^3$",
+          "Volume $= 1.540\\text{ cm}^3$",
+          "Volume $= 12.320\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Rumus volume tabung adalah $V = \\pi r^2 t$. Substitusikan jari-jari $r = 14$ dan tinggi $t = 10$ ke dalam rumus.",
+        explanation: "Volume: $V = \\pi r^2 t = \\frac{22}{7} \\times 14 \\times 14 \\times 10 = 22 \\times 28 \\times 10 = 6.160\\text{ cm}^3$."
+      },
+      {
+        id: 4,
+        category: "TABUNG",
+        difficulty: "Mudah",
+        type: "tabung",
+        caption: "Tabung tertutup dengan jari-jari r dan tinggi t",
+        question: "Hitunglah luas permukaan lengkap (dengan tutup) sebuah tabung yang memiliki jari-jari alas $r = 7\\text{ cm}$ dan tinggi $t = 12\\text{ cm}$! (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Luas Permukaan $= 836\\text{ cm}^2$",
+          "Luas Permukaan $= 418\\text{ cm}^2$",
+          "Luas Permukaan $= 528\\text{ cm}^2$",
+          "Luas Permukaan $= 1.056\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Luas permukaan tabung lengkap adalah $L = 2\\pi r(r + t)$. Hitung terlebih dahulu penjumlahan $(r + t)$.",
+        explanation: "Luas permukaan: $L = 2 \\pi r (r + t) = 2 \\times \\frac{22}{7} \\times 7 \\times (7 + 12) = 44 \\times 19 = 836\\text{ cm}^2$."
+      },
+      {
+        id: 5,
+        category: "KERUCUT",
+        difficulty: "Mudah",
+        type: "kerucut",
+        caption: "Kerucut dengan jari-jari r, tinggi t, dan garis pelukis s",
+        question: "Sebuah kerucut memiliki jari-jari alas $r = 5\\text{ cm}$, tinggi $t = 12\\text{ cm}$, dan panjang garis pelukis $s = 13\\text{ cm}$. Hitunglah volume dan luas permukaannya! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume $= 314\\text{ cm}^3$ dan Luas Permukaan $= 282,6\\text{ cm}^2$",
+          "Volume $= 282,6\\text{ cm}^3$ dan Luas Permukaan $= 314\\text{ cm}^2$",
+          "Volume $= 104,67\\text{ cm}^3$ dan Luas Permukaan $= 204,1\\text{ cm}^2$",
+          "Volume $= 314\\text{ cm}^3$ dan Luas Permukaan $= 204,1\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Volume kerucut $V = \\frac{1}{3} \\pi r^2 t$ dan Luas Permukaan $L = \\pi r (r + s)$.",
+        explanation: "Volume: $V = \\frac{1}{3} \\times 3,14 \\times 5^2 \\times 12 = 4 \\times 3,14 \\times 25 = 314\\text{ cm}^3$.<br>Luas permukaan: $L = \\pi r(r + s) = 3,14 \\times 5 \\times (5 + 13) = 15,7 \\times 18 = 282,6\\text{ cm}^2$."
+      },
+      {
+        id: 6,
+        category: "BOLA",
+        difficulty: "Mudah",
+        type: "bola",
+        caption: "Bola pejal dengan jari-jari r",
+        question: "Sebuah bola memiliki jari-jari $r = 10,5\\text{ cm}$. Berapakah volume bola tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Volume $= 4.851\\text{ cm}^3$",
+          "Volume $= 2.425,5\\text{ cm}^3$",
+          "Volume $= 1.386\\text{ cm}^3$",
+          "Volume $= 9.702\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Rumus volume bola adalah $V = \\frac{4}{3} \\pi r^3$. Tips: ubah $10,5$ menjadi pecahan $\\frac{21}{2}$ untuk mempermudah penyederhanaan.",
+        explanation: "Volume: $V = \\frac{4}{3} \\pi r^3 = \\frac{4}{3} \\times \\frac{22}{7} \\times \\frac{21}{2} \\times \\frac{21}{2} \\times \\frac{21}{2} = 11 \\times 21 \\times 21 = 4.851\\text{ cm}^3$."
+      },
+      {
+        id: 7,
+        category: "BOLA",
+        difficulty: "Mudah",
+        type: "bola",
+        caption: "Bola dengan jari-jari r",
+        question: "Tentukan luas permukaan bola dengan jari-jari $r = 20\\text{ cm}$! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Luas Permukaan $= 5.024\\text{ cm}^2$",
+          "Luas Permukaan $= 1.256\\text{ cm}^2$",
+          "Luas Permukaan $= 2.512\\text{ cm}^2$",
+          "Luas Permukaan $= 16.746,67\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Rumus luas permukaan bola adalah $L = 4 \\pi r^2$. Kalikan konstanta $4$ dengan luas lingkaran berjari-jari $20$.",
+        explanation: "Luas Permukaan: $L = 4 \\pi r^2 = 4 \\times 3,14 \\times 20 \\times 20 = 4 \\times 3,14 \\times 400 = 5.024\\text{ cm}^2$."
+      },
+      {
+        id: 8,
+        category: "LIMAS SEGIEMPAT",
+        difficulty: "Mudah",
+        type: "limas",
+        caption: "Limas segiempat beraturan (sisi alas s, tinggi t, tinggi selimut h_s)",
+        question: "Sebuah limas segiempat memiliki alas berbentuk persegi berukuran $12 \\times 12\\text{ cm}$. Tinggi limas tersebut adalah $t = 8\\text{ cm}$, dan tinggi masing-masing segitiga selimutnya adalah $h_s = 10\\text{ cm}$. Hitung volume dan luas permukaannya!",
+        options: [
+          "Volume $= 384\\text{ cm}^3$ dan Luas Permukaan $= 384\\text{ cm}^2$",
+          "Volume $= 1.152\\text{ cm}^3$ dan Luas Permukaan $= 384\\text{ cm}^2$",
+          "Volume $= 384\\text{ cm}^3$ dan Luas Permukaan $= 240\\text{ cm}^2$",
+          "Volume $= 480\\text{ cm}^3$ dan Luas Permukaan $= 480\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Volume limas $V = \\frac{1}{3} \\times L_{\\text{alas}} \\times t$ dan Luas Permukaan $L = L_{\\text{alas}} + 4 \\times L_{\\text{segitiga}}$.",
+        explanation: "Volume: $V = \\frac{1}{3} \\times (12\\times 12) \\times 8 = 48 \\times 8 = 384\\text{ cm}^3$.<br>Luas permukaan: $L = L_{\\text{alas}} + 4 \\times (\\frac{1}{2} \\times s \\times h_s) = 144 + 4 \\times (\\frac{1}{2} \\times 12 \\times 10) = 144 + 240 = 384\\text{ cm}^2$."
+      },
+      {
+        id: 9,
+        category: "PRISMA SEGITIGA",
+        difficulty: "Mudah",
+        type: "prisma",
+        caption: "Prisma segitiga tegak dengan luas alas L_a dan tinggi t",
+        question: "Sebuah prisma segitiga siku-siku memiliki sisi-sisi alas sepanjang $6\\text{ cm}$, $8\\text{ cm}$, dan $10\\text{ cm}$. Tinggi prisma tersebut adalah $t = 15\\text{ cm}$. Berapakah volume dan luas permukaan prisma?",
+        options: [
+          "Volume $= 360\\text{ cm}^3$ dan Luas Permukaan $= 408\\text{ cm}^2$",
+          "Volume $= 720\\text{ cm}^3$ dan Luas Permukaan $= 408\\text{ cm}^2$",
+          "Volume $= 360\\text{ cm}^3$ dan Luas Permukaan $= 360\\text{ cm}^2$",
+          "Volume $= 480\\text{ cm}^3$ dan Luas Permukaan $= 456\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Sisi penyiku alas adalah $6\\text{ cm}$ dan $8\\text{ cm}$ (sisi miring $10\\text{ cm}$). Volume $V = L_a \\times t$. Luas permukaan $L = 2 L_a + (K_a \\times t)$.",
+        explanation: "Luas Alas: $L_a = \\frac{1}{2} \\times 6 \\times 8 = 24\\text{ cm}^2$.<br>Keliling Alas: $K_a = 6 + 8 + 10 = 24\\text{ cm}$.<br>Volume: $V = L_a \\times t = 24 \\times 15 = 360\\text{ cm}^3$.<br>Luas permukaan: $L = 2(24) + 24 \\times 15 = 48 + 360 = 408\\text{ cm}^2$."
+      },
+      {
+        id: 10,
+        category: "KUBUS",
+        difficulty: "Mudah",
+        type: "kubus",
+        caption: "Kubus dengan panjang rusuk s",
+        question: "Jika volume sebuah kubus adalah $512\\text{ cm}^3$, tentukanlah luas permukaan kubus tersebut!",
+        options: [
+          "Luas Permukaan $= 384\\text{ cm}^2$",
+          "Luas Permukaan $= 512\\text{ cm}^2$",
+          "Luas Permukaan $= 256\\text{ cm}^2$",
+          "Luas Permukaan $= 96\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Cari panjang rusuk $s$ dengan menarik akar pangkat tiga dari volume ($s = \\sqrt[3]{512}$), kemudian gunakan rumus $L = 6s^2$.",
+        explanation: "Karena $V = s^3 = 512$, maka $s = \\sqrt[3]{512} = 8\\text{ cm}$.<br>Luas Permukaan: $L = 6s^2 = 6 \\times 8^2 = 6 \\times 64 = 384\\text{ cm}^2$."
+      },
+      {
+        id: 11,
+        category: "BALOK",
+        difficulty: "Mudah",
+        type: "balok",
+        caption: "Balok dengan perbandingan rusuk p : l : t = 5 : 4 : 3",
+        question: "Perbandingan panjang, lebar, dan tinggi sebuah balok adalah $5 : 4 : 3$. Jika volume balok tersebut adalah $480\\text{ cm}^3$, tentukanlah luas permukaannya!",
+        options: [
+          "Luas Permukaan $= 376\\text{ cm}^2$",
+          "Luas Permukaan $= 188\\text{ cm}^2$",
+          "Luas Permukaan $= 120\\text{ cm}^2$",
+          "Luas Permukaan $= 752\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Misalkan dimensi balok $p = 5x$, $l = 4x$, dan $t = 3x$. Gunakan persamaan volume untuk mencari nilai $x$.",
+        explanation: "Volume: $V = 5x \\times 4x \\times 3x = 60x^3 = 480 \\implies x^3 = 8 \\implies x = 2$.<br>Sehingga $p = 10\\text{ cm}$, $l = 8\\text{ cm}$, dan $t = 6\\text{ cm}$.<br>Luas Permukaan: $L = 2(10\\times 8 + 10\\times 6 + 8\\times 6) = 2(80 + 60 + 48) = 2 \\times 188 = 376\\text{ cm}^2$."
+      },
+      {
+        id: 12,
+        category: "TABUNG",
+        difficulty: "Mudah",
+        type: "tabung",
+        caption: "Tabung dengan jari-jari r dan tinggi t",
+        question: "Sebuah tabung memiliki volume $4.620\\text{ cm}^3$ dan jari-jari alas $r = 7\\text{ cm}$. Berapakah tinggi tabung tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Tinggi $= 30\\text{ cm}$",
+          "Tinggi $= 15\\text{ cm}$",
+          "Tinggi $= 20\\text{ cm}$",
+          "Tinggi $= 10\\text{ cm}$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan rumus volume tabung $V = \\pi r^2 t$. Bagi nilai volume dengan luas alas lingkaran ($\\pi r^2$).",
+        explanation: "Volume: $V = \\pi r^2 t \\implies 4.620 = \\frac{22}{7} \\times 7 \\times 7 \\times t \\implies 4.620 = 154 \\times t$.<br>Sehingga $t = \\frac{4.620}{154} = 30\\text{ cm}$."
+      },
+
+      // PENERAPAN PRAKTIS / WORD PROBLEMS (Sedang)
+      {
+        id: 13,
+        category: "KERUCUT",
+        difficulty: "Sedang",
+        type: "kerucut_terbalik",
+        caption: "Wadah kerucut terbalik berisi air dengan jari-jari r dan tinggi t",
+        question: "Sebuah wadah berbentuk kerucut terbalik berisi air penuh dengan volume $628\\text{ cm}^3$. Jika jari-jari permukaan atas kerucut adalah $r = 10\\text{ cm}$, berapakah tinggi air tersebut? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Tinggi $= 6\\text{ cm}$",
+          "Tinggi $= 12\\text{ cm}$",
+          "Tinggi $= 18\\text{ cm}$",
+          "Tinggi $= 8\\text{ cm}$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan rumus volume kerucut $V = \\frac{1}{3} \\pi r^2 t$ lalu selesaikan untuk variabel $t$.",
+        explanation: "Volume: $V = \\frac{1}{3} \\pi r^2 t \\implies 628 = \\frac{1}{3} \\times 3,14 \\times 10^2 \\times t$.<br>$628 = \\frac{314}{3} \\times t \\implies t = \\frac{628 \\times 3}{314} = 6\\text{ cm}$."
+      },
+      {
+        id: 14,
+        category: "BOLA",
+        difficulty: "Sedang",
+        type: "bola_diameter",
+        caption: "Bola pejal dengan diameter d = 2r",
+        question: "Sebuah bola pejal mainan anak-anak memiliki volume sebesar $113,04\\text{ cm}^3$. Tentukan panjang diameter bola tersebut! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Diameter $= 6\\text{ cm}$",
+          "Diameter $= 3\\text{ cm}$",
+          "Diameter $= 12\\text{ cm}$",
+          "Diameter $= 8\\text{ cm}$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan rumus volume bola $V = \\frac{4}{3} \\pi r^3$ untuk mencari jari-jari $r$ terlebih dahulu, lalu kalikan dua untuk mencari diameter ($d = 2r$).",
+        explanation: "Volume: $V = \\frac{4}{3} \\pi r^3 \\implies 113,04 = \\frac{4}{3} \\times 3,14 \\times r^3$.<br>$r^3 = \\frac{113,04 \\times 3}{4 \\times 3,14} = 27 \\implies r = 3\\text{ cm}$.<br>Diameter: $d = 2 \\times r = 2 \\times 3 = 6\\text{ cm}$."
+      },
+      {
+        id: 15,
+        category: "GABUNGAN",
+        difficulty: "Sedang",
+        type: "gabungan_kubus_balok",
+        caption: "Kubus (rusuk s) bertumpu di atas balok (p × l × t)",
+        question: "Sebuah miniatur mainan terdiri dari kubus bersisi $4\\text{ cm}$ yang ditumpuk di atas sebuah balok dengan ukuran $12 \\times 6 \\times 4\\text{ cm}$. Berapakah volume gabungan dari mainan tersebut?",
+        options: [
+          "Volume Gabungan $= 352\\text{ cm}^3$",
+          "Volume Gabungan $= 288\\text{ cm}^3$",
+          "Volume Gabungan $= 64\\text{ cm}^3$",
+          "Volume Gabungan $= 416\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung volume masing-masing bangun secara terpisah lalu jumlahkan hasilnya: $V_{\\text{total}} = V_{\\text{kubus}} + V_{\\text{balok}}$.",
+        explanation: "Volume Kubus: $V_{\\text{kubus}} = s^3 = 4^3 = 64\\text{ cm}^3$.<br>Volume Balok: $V_{\\text{balok}} = p \\times l \\times t = 12 \\times 6 \\times 4 = 288\\text{ cm}^3$.<br>Volume Total: $64 + 288 = 352\\text{ cm}^3$."
+      },
+      {
+        id: 16,
+        category: "GABUNGAN",
+        difficulty: "Sedang",
+        type: "gabungan_kapsul",
+        caption: "Tabung (tinggi t) dengan satu belahan setengah bola (jari-jari r)",
+        question: "Sebuah kapsul obat berbentuk tabung dengan belahan setengah bola di salah satu ujungnya. Jika jari-jari bola dan tabung adalah $r = 6\\text{ mm}$ dan panjang silinder tabung adalah $t = 15\\text{ mm}$, berapakah volume total kapsul tersebut? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume Total $= 2.147,76\\text{ mm}^3$",
+          "Volume Total $= 1.695,6\\text{ mm}^3$",
+          "Volume Total $= 452,16\\text{ mm}^3$",
+          "Volume Total $= 2.599,92\\text{ mm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Volume kapsul ini terdiri dari Volume Tabung + Volume Setengah Bola ($\\pi r^2 t + \\frac{2}{3}\\pi r^3$).",
+        explanation: "Volume Tabung: $\\pi r^2 t = 3,14 \\times 6^2 \\times 15 = 1.695,6\\text{ mm}^3$.<br>Volume Setengah Bola: $\\frac{2}{3} \\pi r^3 = \\frac{2}{3} \\times 3,14 \\times 6^3 = 452,16\\text{ mm}^3$.<br>Volume Total: $1.695,6 + 452,16 = 2.147,76\\text{ mm}^3$."
+      },
+      {
+        id: 17,
+        category: "GABUNGAN",
+        difficulty: "Sedang",
+        type: "gabungan_tenda",
+        caption: "Tabung (tinggi t₁) beratapkan kerucut (tinggi t₂) dengan jari-jari r",
+        question: "Sebuah posko darurat berbentuk gabungan tabung dan atap berupa kerucut di atasnya. Jika diameter posko $12\\text{ meter}$ ($r = 6\\text{ m}$), tinggi dinding tabung $t_1 = 4\\text{ meter}$, dan tinggi atap kerucutnya $t_2 = 3\\text{ meter}$, hitung volume udara di dalam posko tersebut! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume $= 565,2\\text{ m}^3$",
+          "Volume $= 452,16\\text{ m}^3$",
+          "Volume $= 113,04\\text{ m}^3$",
+          "Volume $= 678,24\\text{ m}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Volume total = Volume Tabung + Volume Kerucut. Gunakan jari-jari alas $r = 6\\text{ m}$ untuk kedua bangun.",
+        explanation: "Volume Tabung: $\\pi r^2 t_1 = 3,14 \\times 6^2 \\times 4 = 452,16\\text{ m}^3$.<br>Volume Kerucut: $\\frac{1}{3} \\pi r^2 t_2 = \\frac{1}{3} \\times 3,14 \\times 6^2 \\times 3 = 113,04\\text{ m}^3$.<br>Volume Total: $452,16 + 113,04 = 565,2\\text{ m}^3$."
+      },
+      {
+        id: 18,
+        category: "KERUCUT",
+        difficulty: "Sedang",
+        type: "potongan_kerucut",
+        caption: "Kerucut terpancung dengan jari-jari atas r₁, alas r₂, dan tinggi t",
+        question: "Sebuah wadah kap lampu memiliki bentuk kerucut terpancung dengan diameter atas $8\\text{ cm}$ ($r_1 = 4\\text{ cm}$), diameter bawah $16\\text{ cm}$ ($r_2 = 8\\text{ cm}$), dan tinggi $t = 6\\text{ cm}$. Berapakah volume wadah tersebut? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume $= 703,36\\text{ cm}^3$",
+          "Volume $= 351,68\\text{ cm}^3$",
+          "Volume $= 1.055,04\\text{ cm}^3$",
+          "Volume $= 628\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Rumus volume kerucut terpancung adalah $V = \\frac{1}{3} \\pi t (r_1^2 + r_2^2 + r_1 r_2)$.",
+        explanation: "Substitusikan nilai ke rumus:<br>$V = \\frac{1}{3} \\times 3,14 \\times 6 \\times (4^2 + 8^2 + 4\\times 8) = 6,28 \\times (16 + 64 + 32) = 6,28 \\times 112 = 703,36\\text{ cm}^3$."
+      },
+      {
+        id: 19,
+        category: "BALOK",
+        difficulty: "Sedang",
+        type: "balok_air",
+        caption: "Bak balok terisi air setinggi 2/3 bagian dari tinggi total",
+        question: "Sebuah bak mandi berbentuk balok dengan panjang $1,5\\text{ m}$, lebar $1,0\\text{ m}$, dan tinggi $0,8\\text{ m}$. Jika bak tersebut diisi air sebanyak $\\frac{2}{3}$ bagian dari kapasitas totalnya, berapa literkah volume air di dalam bak mandi tersebut? (Catatan: $1\\text{ m}^3 = 1.000\\text{ liter}$)",
+        options: [
+          "Volume air $= 800\\text{ liter}$",
+          "Volume air $= 1.200\\text{ liter}$",
+          "Volume air $= 400\\text{ liter}$",
+          "Volume air $= 600\\text{ liter}$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung volume balok dalam $\\text{m}^3$, kalikan dengan $\\frac{2}{3}$, lalu ubah ke satuan liter ($1\\text{ m}^3 = 1.000\\text{ liter}$).",
+        explanation: "Volume Total Balok: $V = p \\times l \\times t = 1,5 \\times 1,0 \\times 0,8 = 1,2\\text{ m}^3$.<br>Volume Air: $\\frac{2}{3} \\times 1,2 = 0,8\\text{ m}^3$.<br>Ubah ke liter: $0,8 \\times 1.000 = 800\\text{ liter}$."
+      },
+      {
+        id: 20,
+        category: "TABUNG",
+        difficulty: "Sedang",
+        type: "tabung",
+        caption: "Tangki air silinder dengan jari-jari r dan tinggi t",
+        question: "Sebuah tangki air berbentuk tabung memiliki jari-jari alas $r = 2\\text{ meter}$ dan tinggi $t = 3\\text{ meter}$. Jika tangki tersebut diisi menggunakan pipa air berkecepatan alir $314\\text{ liter/menit}$, berapakah waktu yang dibutuhkan agar tangki terisi penuh? (Gunakan $\\pi = 3,14$ dan $1\\text{ m}^3 = 1.000\\text{ liter}$)",
+        options: [
+          "Waktu $= 120\\text{ menit}$",
+          "Waktu $= 60\\text{ menit}$",
+          "Waktu $= 40\\text{ menit}$",
+          "Waktu $= 180\\text{ menit}$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung volume tabung dalam liter, lalu bagi dengan debit air ($314\\text{ liter/menit}$).",
+        explanation: "Volume tangki: $V = \\pi r^2 t = 3,14 \\times 2^2 \\times 3 = 37,68\\text{ m}^3$.<br>Ubah ke liter: $37,68 \\times 1.000 = 37.680\\text{ liter}$.<br>Waktu yang dibutuhkan: $\\frac{37.680}{314} = 120\\text{ menit}$."
+      },
+      {
+        id: 21,
+        category: "LIMAS SEGIEMPAT",
+        difficulty: "Sedang",
+        type: "limas",
+        caption: "Atap limas segiempat (alas s, tinggi t, tinggi selimut h_s)",
+        question: "Sebuah atap bangunan berbentuk limas persegi dengan ukuran alas $12 \\times 12\\text{ meter}$ dan tinggi puncak limas $t = 8\\text{ meter}$ (tinggi segitiga selimut $h_s = 10\\text{ meter}$). Jika setiap $1\\text{ m}^2$ permukaan atap membutuhkan $20$ buah genteng, tentukan total genteng yang harus dibeli!",
+        options: [
+          "Total genteng $= 4.800\\text{ buah}$",
+          "Total genteng $= 2.400\\text{ buah}$",
+          "Total genteng $= 7.680\\text{ buah}$",
+          "Total genteng $= 3.840\\text{ buah}$"
+        ],
+        correctIndex: 0,
+        hint: "Hanya luas selimut limas ($4$ buah segitiga) yang ditutupi genteng. Cari luas selimutnya lalu kalikan dengan $20$.",
+        explanation: "Luas $4$ segitiga selimut: $L_{\\text{selimut}} = 4 \\times (\\frac{1}{2} \\times s \\times h_s) = 4 \\times (\\frac{1}{2} \\times 12 \\times 10) = 240\\text{ m}^2$.<br>Total genteng: $240 \\times 20 = 4.800\\text{ buah}$."
+      },
+      {
+        id: 22,
+        category: "BOLA",
+        difficulty: "Sedang",
+        type: "setengah_bola",
+        caption: "Kubah setengah bola dengan diameter d = 28 m (jari-jari r)",
+        question: "Sebuah kubah gedung berbentuk setengah bola dengan diameter luar $28\\text{ meter}$. Permukaan luar kubah tersebut akan dicat dengan biaya cat $\\text{Rp }40.000$ per meter persegi. Berapakah estimasi biaya total mengecat kubah tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Biaya $= \\text{Rp }49.280.000$",
+          "Biaya $= \\text{Rp }98.560.000$",
+          "Biaya $= \\text{Rp }24.640.000$",
+          "Biaya $= \\text{Rp }15.400.000$"
+        ],
+        correctIndex: 0,
+        hint: "Luas permukaan lengkung setengah bola (tanpa alas) adalah $L = 2 \\pi r^2$. Gunakan jari-jari $r = 14\\text{ m}$.",
+        explanation: "Jari-jari: $r = \\frac{28}{2} = 14\\text{ meter}$.<br>Luas lengkung setengah bola: $L = 2 \\pi r^2 = 2 \\times \\frac{22}{7} \\times 14 \\times 14 = 1.232\\text{ m}^2$.<br>Biaya total: $1.232 \\times \\text{Rp }40.000 = \\text{Rp }49.280.000$."
+      },
+      {
+        id: 23,
+        category: "GABUNGAN",
+        difficulty: "Sedang",
+        type: "bola_dalam_tabung",
+        caption: "Bola menyinggung alas, tutup, dan selimut tabung (t = 2r)",
+        question: "Sebuah bola pejal dimasukkan tepat ke dalam sebuah tabung sehingga bola menyinggung sisi alas, sisi atas, dan seluruh selimut tabung dengan sempurna. Berapakah perbandingan antara luas permukaan bola dengan luas permukaan total tabung?",
+        options: [
+          "$2 : 3$",
+          "$1 : 2$",
+          "$3 : 4$",
+          "$4 : 5$"
+        ],
+        correctIndex: 0,
+        hint: "Karena bola menyinggung seluruh bagian dalam tabung, tinggi tabung $t = 2r$ (diameter bola). Nyatakan kedua luas dalam variabel $r$ lalu bandingkan.",
+        explanation: "Luas Permukaan Bola: $L_{\\text{bola}} = 4 \\pi r^2$.<br>Luas Permukaan Tabung: $L_{\\text{tabung}} = 2 \\pi r (r + t) = 2 \\pi r (r + 2r) = 6 \\pi r^2$.<br>Perbandingan: $L_{\\text{bola}} : L_{\\text{tabung}} = 4 \\pi r^2 : 6 \\pi r^2 = 4 : 6 = 2 : 3$."
+      },
+      {
+        id: 24,
+        category: "GABUNGAN",
+        difficulty: "Sedang",
+        type: "es_krim_cone",
+        caption: "Kerucut terbalik (tinggi t) dengan setengah bola es krim di atasnya (jari-jari r)",
+        question: "Sebuah es krim cone terdiri atas kerucut wafer berisi penuh es krim dengan jari-jari lingkaran atas $r = 6\\text{ cm}$ dan tinggi cone $t = 15\\text{ cm}$. Di atas cone diletakkan satu skop es krim berbentuk setengah bola dengan jari-jari sama ($r = 6\\text{ cm}$). Berapa total volume es krim seluruhnya? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume total $= 1.017,36\\text{ cm}^3$",
+          "Volume total $= 565,2\\text{ cm}^3$",
+          "Volume total $= 452,16\\text{ cm}^3$",
+          "Volume total $= 1.469,52\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Total volume = Volume Kerucut + Volume Setengah Bola ($\\frac{1}{3}\\pi r^2 t + \\frac{2}{3}\\pi r^3$).",
+        explanation: "Volume Kerucut: $\\frac{1}{3} \\pi r^2 t = \\frac{1}{3} \\times 3,14 \\times 6^2 \\times 15 = 565,2\\text{ cm}^3$.<br>Volume Setengah Bola: $\\frac{2}{3} \\pi r^3 = \\frac{2}{3} \\times 3,14 \\times 6^3 = 452,16\\text{ cm}^3$.<br>Volume total: $565,2 + 452,16 = 1.017,36\\text{ cm}^3$."
+      },
+      {
+        id: 25,
+        category: "TABUNG",
+        difficulty: "Sedang",
+        type: "pipa_berongga",
+        caption: "Silinder berongga dengan jari-jari luar R, jari-jari dalam r, dan panjang t",
+        question: "Sebuah pipa besi berongga memiliki panjang $t = 100\\text{ cm}$, diameter luar $20\\text{ cm}$ ($R = 10\\text{ cm}$), dan tebal besi pipa sebesar $2\\text{ cm}$ (sehingga $r = 8\\text{ cm}$). Hitunglah volume besi padat pembentuk pipa tersebut! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume besi $= 11.304\\text{ cm}^3$",
+          "Volume besi $= 31.400\\text{ cm}^3$",
+          "Volume besi $= 20.096\\text{ cm}^3$",
+          "Volume besi $= 5.652\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Volume besi padat didapatkan dari selisih luas lingkaran luar dan dalam dikalikan panjang pipa: $V = \\pi (R^2 - r^2) \\times t$.",
+        explanation: "Jari-jari luar $R = 10\\text{ cm}$, jari-jari dalam $r = 10 - 2 = 8\\text{ cm}$.<br>Volume Besi: $V = 3,14 \\times (10^2 - 8^2) \\times 100 = 3,14 \\times (100 - 64) \\times 100 = 314 \\times 36 = 11.304\\text{ cm}^3$."
+      },
+      {
+        id: 26,
+        category: "LIMAS SEGIEMPAT",
+        difficulty: "Sedang",
+        type: "limas",
+        caption: "Limas segiempat beraturan dengan sisi alas s dan tinggi t",
+        question: "Sebuah bangunan berbentuk limas segiempat beraturan dengan panjang rusuk alas persegi sepanjang $s = 30\\text{ meter}$ dan tinggi bangunan $t = 15\\text{ meter}$. Berapakah kapasitas volume udara di dalam bangunan tersebut?",
+        options: [
+          "Volume $= 4.500\\text{ m}^3$",
+          "Volume $= 13.500\\text{ m}^3$",
+          "Volume $= 2.250\\text{ m}^3$",
+          "Volume $= 9.000\\text{ m}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan rumus Volume limas $V = \\frac{1}{3} \\times L_{\\text{alas}} \\times t$ dengan sisi alas persegi $s = 30\\text{ m}$.",
+        explanation: "Volume Limas: $V = \\frac{1}{3} \\times (30 \\times 30) \\times 15 = 900 \\times 5 = 4.500\\text{ m}^3$."
+      },
+      {
+        id: 27,
+        category: "TABUNG",
+        difficulty: "Sedang",
+        type: "tabung_kelereng",
+        caption: "Wadah tabung (jari-jari R) mengalami kenaikan air Δt akibat kelereng (jari-jari r)",
+        question: "Ke dalam wadah gelas berbentuk tabung dengan diameter $12\\text{ cm}$ ($R = 6\\text{ cm}$) yang berisi air, dimasukkan sebanyak $18$ buah kelereng logam pejal berdiameter $2\\text{ cm}$ ($r = 1\\text{ cm}$). Tentukan tinggi kenaikan air ($\\Delta t$) di dalam tabung setelah seluruh kelereng tenggelam!",
+        options: [
+          "Kenaikan tinggi air $= 0,67\\text{ cm}$",
+          "Kenaikan tinggi air $= 1,33\\text{ cm}$",
+          "Kenaikan tinggi air $= 0,50\\text{ cm}$",
+          "Kenaikan tinggi air $= 0,33\\text{ cm}$"
+        ],
+        correctIndex: 0,
+        hint: "Pertambahan volume air tabung sama dengan volume total $18$ kelereng: $\\pi R^2 \\Delta t = 18 \\times \\frac{4}{3} \\pi r^3$.",
+        explanation: "Volume $18$ Kelereng: $18 \\times \\frac{4}{3} \\pi r^3 = 24 \\pi \\times 1^3 = 24\\pi\\text{ cm}^3$.<br>Kenaikan air: $\\pi R^2 \\Delta t = 24\\pi \\implies \\pi (6^2) \\Delta t = 24\\pi \\implies 36 \\Delta t = 24 \\implies \\Delta t = \\frac{24}{36} = \\frac{2}{3} \\approx 0,67\\text{ cm}$."
+      },
+      {
+        id: 28,
+        category: "PRISMA SEGITIGA",
+        difficulty: "Sedang",
+        type: "tenda_prisma",
+        caption: "Tenda prisma segitiga tidur dengan lebar alas a, tinggi segitiga t_a, dan panjang p",
+        question: "Sebuah tenda berbentuk prisma segitiga dengan panjang tenda $5\\text{ m}$, lebar alas tenda $6\\text{ m}$, dan tinggi segitiga pintu depan $4\\text{ m}$. Panjang sisi miring atap tenda adalah $5\\text{ m}$. Berapa luas total bahan terpal yang dibutuhkan untuk membuat tenda utuh (termasuk alas bawah)?",
+        options: [
+          "Luas kain terpal $= 104\\text{ m}^2$",
+          "Luas kain terpal $= 80\\text{ m}^2$",
+          "Luas kain terpal $= 128\\text{ m}^2$",
+          "Luas kain terpal $= 92\\text{ m}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Luas permukaan prisma segitiga $= 2 \\times L_a + (K_a \\times \\text{panjang tenda})$. Sisi segitiga alas adalah $6\\text{ m}$, $5\\text{ m}$, dan $5\\text{ m}$.",
+        explanation: "Luas Alas Segitiga: $L_a = \\frac{1}{2} \\times 6 \\times 4 = 12\\text{ m}^2$.<br>Keliling Alas Segitiga: $K_a = 6 + 5 + 5 = 16\\text{ m}$.<br>Luas Permukaan Total: $2(12) + (16 \\times 5) = 24 + 80 = 104\\text{ m}^2$."
+      },
+      {
+        id: 29,
+        category: "BALOK",
+        difficulty: "Sedang",
+        type: "balok_potong_kubus",
+        caption: "Balok besar (p × l × t) dipotong menjadi kubus-kubus kecil bersisi s",
+        question: "Sebuah balok kayu berukuran $15 \\times 10 \\times 8\\text{ cm}$ akan dipotong menjadi kubus-kubus kecil berukuran rusuk $s = 2\\text{ cm}$. Berapakah banyak maksimal kubus kecil utuh yang dapat diperoleh dari balok tersebut?",
+        options: [
+          "Banyak kubus $= 140\\text{ buah}$",
+          "Banyak kubus $= 187\\text{ buah}$",
+          "Banyak kubus $= 150\\text{ buah}$",
+          "Banyak kubus $= 120\\text{ buah}$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung berapa banyak potongan utuh yang dapat diperoleh di masing-masing arah panjang, lebar, dan tinggi (sisa potongan tidak dapat digabung).",
+        explanation: "Arah panjang: $\\lfloor 15 / 2 \\rfloor = 7$ bagian utuh.<br>Arah lebar: $\\lfloor 10 / 2 \\rfloor = 5$ bagian utuh.<br>Arah tinggi: $\\lfloor 8 / 2 \\rfloor = 4$ bagian utuh.<br>Banyak kubus maksimal: $7 \\times 5 \\times 4 = 140\\text{ buah}$."
+      },
+
+      // ADVANCED / COMBINED / TRICKY PROBLEMS (Tinggi)
+      {
+        id: 30,
+        category: "KERUCUT",
+        difficulty: "Tinggi",
+        type: "kerucut",
+        caption: "Kerucut dengan rasio jari-jari r dan tinggi t = 5 : 12",
+        question: "Sebuah kerucut memiliki rasio perbandingan panjang jari-jari dan tinggi sebesar $r : t = 5 : 12$. Jika luas permukaannya adalah $90\\pi\\text{ cm}^2$, tentukan volume kerucut tersebut!",
+        options: [
+          "Volume $= 100\\pi\\text{ cm}^3$",
+          "Volume $= 120\\pi\\text{ cm}^3$",
+          "Volume $= 150\\pi\\text{ cm}^3$",
+          "Volume $= 200\\pi\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Dengan perbandingan $r = 5x$ dan $t = 12x$, dapatkan garis pelukis $s = 13x$. Masukkan ke rumus luas $L = \\pi r(r + s)$ untuk mencari $x$.",
+        explanation: "Dari tripel Pythagoras, $s = \\sqrt{(5x)^2 + (12x)^2} = 13x$.<br>Luas: $L = \\pi r (r + s) \\implies 90\\pi = \\pi (5x)(5x + 13x) \\implies 90 = 90x^2 \\implies x = 1$.<br>Diperoleh $r = 5\\text{ cm}$ dan $t = 12\\text{ cm}$.<br>Volume: $V = \\frac{1}{3} \\pi r^2 t = \\frac{1}{3} \\pi (5^2)(12) = 100\\pi\\text{ cm}^3$."
+      },
+      {
+        id: 31,
+        category: "GABUNGAN",
+        difficulty: "Tinggi",
+        type: "transfer_setengah_bola_tabung",
+        caption: "Transfer air dari setengah bola (jari-jari r) ke tabung (jari-jari r, tinggi air h)",
+        question: "Sebuah wadah berbentuk belahan setengah bola terisi penuh oleh zat cair. Zat cair tersebut dituangkan seluruhnya ke dalam wadah tabung tegak yang memiliki panjang jari-jari alas sama dengan jari-jari setengah bola tersebut. Berapakah perbandingan antara jari-jari tabung ($r$) terhadap tinggi zat cair di dalam tabung ($h$)?",
+        options: [
+          "$3 : 2$",
+          "$2 : 3$",
+          "$1 : 2$",
+          "$1 : 1$"
+        ],
+        correctIndex: 0,
+        hint: "Volume setengah bola sama dengan volume air di tabung setinggi $h$: $\\frac{2}{3} \\pi r^3 = \\pi r^2 h$. Sederhanakan untuk mencari rasio $r : h$.",
+        explanation: "Volume setengah bola $= \\frac{2}{3} \\pi r^3$.<br>Volume air di tabung $= \\pi r^2 h$.<br>Persamaan: $\\frac{2}{3} \\pi r^3 = \\pi r^2 h \\implies \\frac{2}{3} r = h \\implies \\frac{r}{h} = \\frac{3}{2}$.<br>Jadi perbandingan $r : h = 3 : 2$."
+      },
+      {
+        id: 32,
+        category: "GABUNGAN",
+        difficulty: "Tinggi",
+        type: "akuarium_kubus_logam",
+        caption: "Akuarium balok berisi air dengan 4 kubus logam tenggelam di dasar",
+        question: "Wadah akuarium berbentuk balok dengan panjang alas $50\\text{ cm}$, lebar $40\\text{ cm}$, dan tinggi $30\\text{ cm}$ diisi air dengan ketinggian awal $15\\text{ cm}$. Kemudian, dimasukkan sebanyak $4$ buah kubus logam pejal identik berusuk $10\\text{ cm}$ ke dasar akuarium. Berapakah tinggi air akuarium sekarang?",
+        options: [
+          "Tinggi air sekarang $= 17\\text{ cm}$",
+          "Tinggi air sekarang $= 16\\text{ cm}$",
+          "Tinggi air sekarang $= 19\\text{ cm}$",
+          "Tinggi air sekarang $= 18\\text{ cm}$"
+        ],
+        correctIndex: 0,
+        hint: "Kenaikan tinggi air adalah $\\Delta h = \\frac{V_{\\text{total logam}}}{L_{\\text{alas akuarium}}}$. Tambahkan $\\Delta h$ ke tinggi air awal ($15\\text{ cm}$).",
+        explanation: "Volume total $4$ kubus logam: $V = 4 \\times 10^3 = 4.000\\text{ cm}^3$.<br>Luas alas akuarium: $L_{\\text{alas}} = 50 \\times 40 = 2.000\\text{ cm}^2$.<br>Kenaikan air: $\\Delta h = \\frac{4.000}{2.000} = 2\\text{ cm}$.<br>Tinggi air baru: $15 + 2 = 17\\text{ cm}$."
+      },
+      {
+        id: 33,
+        category: "PRISMA BELAH KETUPAT",
+        difficulty: "Tinggi",
+        type: "prisma_belah_ketupat",
+        caption: "Prisma tegak beralas belah ketupat (diagonal d₁, d₂, dan tinggi t)",
+        question: "Sebuah prisma tegak memiliki alas berbentuk belah ketupat dengan panjang diagonal-diagonalnya masing-masing adalah $d_1 = 10\\text{ cm}$ dan $d_2 = 24\\text{ cm}$. Jika tinggi prisma tersebut adalah $t = 15\\text{ cm}$, hitunglah luas permukaan lengkap prisma tersebut!",
+        options: [
+          "Luas Permukaan $= 1.020\\text{ cm}^2$",
+          "Luas Permukaan $= 780\\text{ cm}^2$",
+          "Luas Permukaan $= 540\\text{ cm}^2$",
+          "Luas Permukaan $= 1.140\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Gunakan teorema Pythagoras pada setengah diagonal ($5\\text{ cm}$ dan $12\\text{ cm}$) untuk mencari sisi belah ketupat ($s$). Luas permukaan $= 2 L_{\\text{alas}} + (K_{\\text{alas}} \\times t)$.",
+        explanation: "Sisi belah ketupat: $s = \\sqrt{5^2 + 12^2} = 13\\text{ cm}$.<br>Keliling alas: $K_{\\text{alas}} = 4 \\times 13 = 52\\text{ cm}$.<br>Luas Alas: $L_{\\text{alas}} = \\frac{1}{2} \\times 10 \\times 24 = 120\\text{ cm}^2$.<br>Luas Permukaan: $2(120) + (52 \\times 15) = 240 + 780 = 1.020\\text{ cm}^2$."
+      },
+      {
+        id: 34,
+        category: "GABUNGAN",
+        difficulty: "Tinggi",
+        type: "bola_dalam_kubus",
+        caption: "Bola menyinggung keenam sisi dalam kubus berusuk s (r = s/2)",
+        question: "Sebuah bola dimasukkan dengan tepat ke dalam sebuah kotak kubus berusuk $s$ sehingga bola tersebut menyinggung keenam sisi kubus secara sempurna. Tentukan persentase volume kubus yang berada di luar bola! (Gunakan $\\pi \\approx 3,14$)",
+        options: [
+          "$47,6\\%$",
+          "$52,4\\%$",
+          "$26,2\\%$",
+          "$73,8\\%$"
+        ],
+        correctIndex: 0,
+        hint: "Karena bola menyinggung seluruh sisi kubus, jari-jari bola adalah $r = \\frac{s}{2}$. Bandingkan volume bola terhadap volume kubus.",
+        explanation: "Volume Kubus: $V_{\\text{kubus}} = s^3$.<br>Volume Bola: $V_{\\text{bola}} = \\frac{4}{3} \\pi \\left(\\frac{s}{2}\\right)^3 = \\frac{\\pi}{6} s^3 \\approx 0,5236 s^3$ atau $52,36\\%$.<br>Sisa volume di luar bola: $100\\% - 52,36\\% = 47,64\\% \\approx 47,6\\%$."
+      },
+      {
+        id: 35,
+        category: "TABUNG",
+        difficulty: "Tinggi",
+        type: "tabung_tanpa_tutup",
+        caption: "Tabung terbuka (tanpa tutup atas) dengan jari-jari r dan tinggi t",
+        question: "Terdapat wadah berbentuk tabung tanpa tutup dengan jari-jari alas $r = 5\\text{ cm}$ dan tinggi $t = 20\\text{ cm}$. Bagian luar tabung tersebut (termasuk alas bawahnya) ingin dilapisi kertas pembungkus secara rapi. Berapakah luas permukaan kertas minimal yang dibutuhkan? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Luas Pembungkus $= 706,5\\text{ cm}^2$",
+          "Luas Pembungkus $= 628\\text{ cm}^2$",
+          "Luas Pembungkus $= 785\\text{ cm}^2$",
+          "Luas Pembungkus $= 1.413\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Tabung ini tanpa tutup, sehingga luas permukaan yang dilapisi adalah Luas Alas + Luas Selimut Tabung $= \\pi r^2 + 2 \\pi r t$.",
+        explanation: "Luas Alas: $3,14 \\times 5^2 = 78,5\\text{ cm}^2$.<br>Luas Selimut: $2 \\times 3,14 \\times 5 \\times 20 = 628\\text{ cm}^2$.<br>Luas permukaan yang dilapisi: $78,5 + 628 = 706,5\\text{ cm}^2$."
+      },
+      {
+        id: 36,
+        category: "BOLA",
+        difficulty: "Tinggi",
+        type: "enam_bola_tenis",
+        caption: "6 buah bola tenis identik masing-masing berdiameter d = 7 cm",
+        question: "Pabrik olahraga ingin memproduksi $6$ buah bola tenis berdiameter $7\\text{ cm}$ ($r = 3,5\\text{ cm}$). Bagian permukaan luar seluruh bola tersebut dilapisi kain felt. Berapa $\\text{cm}^2$ luas felt minimal yang dibutuhkan untuk membungkus seluruh bola tersebut? (Gunakan $\\pi = \\frac{22}{7}$)",
+        options: [
+          "Luas felt $= 924\\text{ cm}^2$",
+          "Luas felt $= 154\\text{ cm}^2$",
+          "Luas felt $= 1.848\\text{ cm}^2$",
+          "Luas felt $= 308\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung luas permukaan bola $L = 4 \\pi r^2$ untuk satu bola, lalu kalikan hasilnya dengan $6$.",
+        explanation: "Luas $1$ bola tenis: $L = 4 \\times \\frac{22}{7} \\times 3,5 \\times 3,5 = 154\\text{ cm}^2$.<br>Luas felt untuk $6$ bola: $6 \\times 154 = 924\\text{ cm}^2$."
+      },
+      {
+        id: 37,
+        category: "KERUCUT",
+        difficulty: "Tinggi",
+        type: "kerucut",
+        caption: "Tumpukan pasir berbentuk kerucut dengan jari-jari r dan tinggi t",
+        question: "Tumpukan pasir berbentuk kerucut sempurna memiliki diameter alas $12\\text{ meter}$ ($r = 6\\text{ m}$) dan tinggi tumpukan $t = 3\\text{ meter}$. Jika berat $1\\text{ m}^3$ pasir adalah $1,6\\text{ ton}$, berapakah perkiraan berat total tumpukan pasir tersebut? (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Berat total $= 180,86\\text{ ton}$",
+          "Berat total $= 113,04\\text{ ton}$",
+          "Berat total $= 282,6\\text{ ton}$",
+          "Berat total $= 90,43\\text{ ton}$"
+        ],
+        correctIndex: 0,
+        hint: "Hitung volume kerucut pasir terlebih dahulu dengan rumus $V = \\frac{1}{3} \\pi r^2 t$, lalu kalikan volume dengan massa jenis ($1,6\\text{ ton/m}^3$).",
+        explanation: "Volume kerucut pasir: $V = \\frac{1}{3} \\times 3,14 \\times 6^2 \\times 3 = 113,04\\text{ m}^3$.<br>Berat total: $113,04 \\times 1,6 = 180,864\\text{ ton} \\approx 180,86\\text{ ton}$."
+      },
+      {
+        id: 38,
+        category: "LIMAS SEGITIGA",
+        difficulty: "Tinggi",
+        type: "tetrahedron",
+        caption: "Limas segitiga beraturan (Tetrahedron) dengan semua rusuk sama panjang s",
+        question: "Sebuah limas segitiga beraturan (tetrahedron) memiliki panjang semua rusuknya $s = 12\\text{ cm}$. Hitunglah volume bangun ruang tetrahedron tersebut! (Gunakan rumus: $V = \\frac{s^3 \\sqrt{2}}{12}$)",
+        options: [
+          "Volume $= 144\\sqrt{2}\\text{ cm}^3$",
+          "Volume $= 72\\sqrt{2}\\text{ cm}^3$",
+          "Volume $= 144\\sqrt{3}\\text{ cm}^3$",
+          "Volume $= 288\\sqrt{2}\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Substitusikan nilai rusuk $s = 12$ ke dalam rumus volume tetrahedron yang diberikan.",
+        explanation: "Volume: $V = \\frac{s^3 \\sqrt{2}}{12} = \\frac{12^3 \\sqrt{2}}{12} = \\frac{1.728 \\sqrt{2}}{12} = 144\\sqrt{2}\\text{ cm}^3$."
+      },
+      {
+        id: 39,
+        category: "TABUNG",
+        difficulty: "Tinggi",
+        type: "pipa_berongga",
+        caption: "Cincin silinder berongga dengan jari-jari luar R, dalam r, dan lebar t",
+        question: "Sebuah cincin logam berbentuk silinder berongga memiliki diameter luar $22\\text{ mm}$ ($R = 1,1\\text{ cm}$), tebal logam cincin $1\\text{ mm}$ ($0,1\\text{ cm}$, sehingga $r = 1,0\\text{ cm}$), dan lebar cincin (tinggi silinder) $t = 10\\text{ mm}$ ($1,0\\text{ cm}$). Tentukan volume logam pembentuk cincin tersebut! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Volume logam $= 0,6594\\text{ cm}^3$",
+          "Volume logam $= 1,1304\\text{ cm}^3$",
+          "Volume logam $= 0,3297\\text{ cm}^3$",
+          "Volume logam $= 1,57\\text{ cm}^3$"
+        ],
+        correctIndex: 0,
+        hint: "Cincin logam ini berbentuk silinder luar dikurangi silinder dalam: $V = \\pi (R^2 - r^2) \\times t$. Pastikan semua satuan dalam $\\text{cm}$.",
+        explanation: "Panjang $R = 1,1\\text{ cm}$, $r = 1,0\\text{ cm}$, dan tinggi $t = 1,0\\text{ cm}$.<br>Volume: $V = 3,14 \\times (1,1^2 - 1,0^2) \\times 1,0 = 3,14 \\times (1,21 - 1,00) \\times 1,0 = 3,14 \\times 0,21 = 0,6594\\text{ cm}^3$."
+      },
+      {
+        id: 40,
+        category: "GABUNGAN",
+        difficulty: "Tinggi",
+        type: "bikerucut",
+        caption: "Gabungan dua kerucut berhimpit alas (jari-jari r, pelukis s₁ dan s₂)",
+        question: "Dua buah kerucut disatukan alasnya (berhimpit di dalam). Jari-jari lingkaran alas gabungan tersebut adalah $r = 8\\text{ cm}$. Kerucut atas memiliki tinggi $15\\text{ cm}$ ($s_1 = 17\\text{ cm}$), sedangkan kerucut bawah memiliki tinggi $6\\text{ cm}$ ($s_2 = 10\\text{ cm}$). Hitunglah luas permukaan luar gabungan tersebut! (Gunakan $\\pi = 3,14$)",
+        options: [
+          "Luas Permukaan $= 678,24\\text{ cm}^2$",
+          "Luas Permukaan $= 339,12\\text{ cm}^2$",
+          "Luas Permukaan $= 502,4\\text{ cm}^2$",
+          "Luas Permukaan $= 879,2\\text{ cm}^2$"
+        ],
+        correctIndex: 0,
+        hint: "Luas permukaan luar bikerucut ini terdiri dari Luas Selimut Atas + Luas Selimut Bawah ($\\pi r s_1 + \\pi r s_2$). Bagian alas tengah berhimpit sehingga tidak dihitung.",
+        explanation: "Luas Selimut Atas: $\\pi r s_1 = 3,14 \\times 8 \\times 17 = 427,04\\text{ cm}^2$.<br>Luas Selimut Bawah: $\\pi r s_2 = 3,14 \\times 8 \\times 10 = 251,2\\text{ cm}^2$.<br>Luas Permukaan Total: $427,04 + 251,2 = 678,24\\text{ cm}^2$."
+      }
+    ];
+
+    // --- APPLICATION STATE ---
+    let currentIdx = 0;
+    let userAnswers = Array(40).fill(null);
+    let questionStates = Array(40).fill("unanswered");
+
+    // --- DOM ELEMENTS ---
+    const gridEl = document.getElementById("question-tabs-grid");
+    const shapeBadgeEl = document.getElementById("shape-category-badge");
+    const diffBadgeEl = document.getElementById("difficulty-badge");
+    const qNumEl = document.getElementById("current-question-num");
+    const qTextEl = document.getElementById("question-text");
+    const hintBoxEl = document.getElementById("hint-box");
+    const optionsContainer = document.getElementById("options-container");
+    const svgDrawingArea = document.getElementById("svg-drawing-area");
+    const illustrationCaptionEl = document.getElementById("illustration-caption");
+    
+    const btnPrev = document.getElementById("btn-prev");
+    const btnCheck = document.getElementById("btn-check");
+    const btnNext = document.getElementById("btn-next");
+    const answeredCheckedBadge = document.getElementById("answer-checked-badge");
+    
+    const pembahasanSection = document.getElementById("pembahasan-section");
+    const pembahasanContent = document.getElementById("pembahasan-content");
+    
+    const scoreBadge = document.getElementById("score-badge");
+    const progressBarInner = document.getElementById("progress-bar-inner");
+    const progressPercentage = document.getElementById("progress-percentage");
+    const resetModal = document.getElementById("reset-modal");
+
+    // --- SHAPE RENDERERS (AKURAT UNTUK SETIAP SOAL) ---
+    function generateSVGMarkup(type) {
+      const strokeColor = "#38bdf8"; // cyan-400
+      const strokeWidth = "2";
+      
+      switch (type) {
+        case "kubus": {
+          const s = 90;
+          const dx = s * Math.cos(Math.PI / 6);
+          const dy = s * Math.sin(Math.PI / 6);
+          const cx = 150, cy = 125;
+          
+          const p0 = [cx, cy];
+          const p1 = [cx + dx, cy - dy];
+          const p2 = [cx, cy - 2*dy];
+          const p3 = [cx - dx, cy - dy];
+          const p4 = [cx, cy + s];
+          const p5 = [cx + dx, cy + s - dy];
+          const p6 = [cx - dx, cy + s - dy];
+          const p7 = [cx, cy + s - 2*dy];
+
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="top-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#818cf8" />
+                  <stop offset="100%" stop-color="#4f46e5" />
+                </linearGradient>
+                <linearGradient id="left-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#4f46e5" />
+                  <stop offset="100%" stop-color="#312e81" />
+                </linearGradient>
+                <linearGradient id="right-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4338ca" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+              </defs>
+              <line x1="${p3[0]}" y1="${p3[1]}" x2="${p7[0]}" y2="${p7[1]}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="${p1[0]}" y1="${p1[1]}" x2="${p7[0]}" y2="${p7[1]}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="${p4[0]}" y1="${p4[1]}" x2="${p7[0]}" y2="${p7[1]}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              
+              <polygon points="${p0[0]},${p0[1]} ${p1[0]},${p1[1]} ${p2[0]},${p2[1]} ${p3[0]},${p3[1]}" fill="url(#top-grad)" opacity="0.9" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <polygon points="${p0[0]},${p0[1]} ${p3[0]},${p3[1]} ${p6[0]},${p6[1]} ${p4[0]},${p4[1]}" fill="url(#left-grad)" opacity="0.85" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <polygon points="${p0[0]},${p0[1]} ${p1[0]},${p1[1]} ${p5[0]},${p5[1]} ${p4[0]},${p4[1]}" fill="url(#right-grad)" opacity="0.85" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              
+              <line x1="${p6[0] - 8}" y1="${p6[1] + 8}" x2="${p4[0] - 8}" y2="${p4[1] + 8}" stroke="#fbbf24" stroke-width="1.5" />
+              <text x="${(p6[0]+p4[0])/2 - 15}" y="${(p6[1]+p4[1])/2 + 24}" fill="#fbbf24" font-weight="bold" font-size="14">s</text>
+              <text x="${p5[0] + 10}" y="${(p1[1]+p5[1])/2}" fill="#fbbf24" font-weight="bold" font-size="14">s</text>
+            </svg>
+          `;
+        }
+
+        case "balok": {
+          const w = 110, d = 60, h = 70;
+          const cx = 140, cy = 165;
+          const dx_w = w * Math.cos(Math.PI / 6);
+          const dy_w = w * Math.sin(Math.PI / 6);
+          const dx_d = d * Math.cos(5 * Math.PI / 6);
+          const dy_d = d * Math.sin(5 * Math.PI / 6);
+
+          const p0 = [cx, cy];
+          const p1 = [cx + dx_w, cy - dy_w];
+          const p2 = [cx + dx_w + dx_d, cy - dy_w - dy_d];
+          const p3 = [cx + dx_d, cy - dy_d];
+          const p4 = [p0[0], p0[1] - h];
+          const p5 = [p1[0], p1[1] - h];
+          const p6 = [p2[0], p2[1] - h];
+          const p7 = [p3[0], p3[1] - h];
+
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="top-grad-balok" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#a78bfa" />
+                  <stop offset="100%" stop-color="#6d28d9" />
+                </linearGradient>
+                <linearGradient id="front-grad-balok" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#6d28d9" />
+                  <stop offset="100%" stop-color="#4c1d95" />
+                </linearGradient>
+                <linearGradient id="side-grad-balok" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4c1d95" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+              </defs>
+
+              <line x1="${p0[0]}" y1="${p0[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#475569" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="${p3[0]}" y1="${p3[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#475569" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="#475569" stroke-width="1" stroke-dasharray="3,3" />
+              
+              <polygon points="${p4[0]},${p4[1]} ${p5[0]},${p5[1]} ${p6[0]},${p6[1]} ${p7[0]},${p7[1]}" fill="url(#top-grad-balok)" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <polygon points="${p0[0]},${p0[1]} ${p3[0]},${p3[1]} ${p7[0]},${p7[1]} ${p4[0]},${p4[1]}" fill="url(#front-grad-balok)" opacity="0.9" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <polygon points="${p0[0]},${p0[1]} ${p1[0]},${p1[1]} ${p5[0]},${p5[1]} ${p4[0]},${p4[1]}" fill="url(#side-grad-balok)" opacity="0.95" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              
+              <text x="${(p0[0]+p1[0])/2 + 8}" y="${(p0[1]+p1[1])/2 + 22}" fill="#fbbf24" font-weight="bold" font-size="14">p</text>
+              <text x="${(p3[0]+p0[0])/2 - 18}" y="${(p3[1]+p0[1])/2 + 20}" fill="#fbbf24" font-weight="bold" font-size="14">l</text>
+              <text x="${p1[0] + 14}" y="${(p5[1]+p1[1])/2 + 4}" fill="#fbbf24" font-weight="bold" font-size="14">t</text>
+            </svg>
+          `;
+        }
+
+        case "balok_air": {
+          // Soal 19: Bak mandi balok terisi air 2/3 bagian
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="water-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.75" />
+                  <stop offset="100%" stop-color="#0284c7" stop-opacity="0.85" />
+                </linearGradient>
+              </defs>
+              <!-- Bak Kaca Transparan -->
+              <polygon points="70,70 120,45 240,45 190,70" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="120" y1="45" x2="120" y2="155" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="120" y1="155" x2="70" y2="180" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="120" y1="155" x2="240" y2="155" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" />
+              
+              <!-- Volume Air (2/3 tinggi) -->
+              <polygon points="70,107 190,107 190,180 70,180" fill="url(#water-grad)" />
+              <polygon points="190,107 240,82 240,155 190,180" fill="#0369a1" opacity="0.8" />
+              <polygon points="70,107 120,82 240,82 190,107" fill="#7dd3fc" opacity="0.6" stroke="#38bdf8" stroke-width="1.5" />
+              
+              <!-- Garis Luar Bak -->
+              <polygon points="70,70 190,70 190,180 70,180" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="190,70 240,45 240,155 190,180" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              
+              <text x="125" y="198" fill="#fbbf24" font-weight="bold" font-size="13">p = 1,5 m</text>
+              <text x="218" y="182" fill="#fbbf24" font-weight="bold" font-size="13">l = 1 m</text>
+              <text x="246" y="105" fill="#94a3b8" font-weight="bold" font-size="12">t = 0,8 m</text>
+              <text x="95" y="148" fill="#ffffff" font-weight="extrabold" font-size="13">Air 2/3 Bagian</text>
+            </svg>
+          `;
+        }
+
+        case "balok_potong_kubus": {
+          // Soal 29: Balok dipotong menjadi kubus-kubus kecil
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Balok Utama -->
+              <polygon points="60,90 190,90 190,175 60,175" fill="#4f46e5" opacity="0.75" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="190,90 240,60 240,145 190,175" fill="#312e81" opacity="0.85" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="60,90 110,60 240,60 190,90" fill="#818cf8" opacity="0.85" stroke="${strokeColor}" stroke-width="2" />
+              
+              <!-- Garis Potongan Grid -->
+              <line x1="103" y1="90" x2="103" y2="175" stroke="#c7d2fe" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="146" y1="90" x2="146" y2="175" stroke="#c7d2fe" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="60" y1="132" x2="190" y2="132" stroke="#c7d2fe" stroke-width="1" stroke-dasharray="3,3" />
+              
+              <!-- Kubus Kecil Terpisah di Sudut -->
+              <g transform="translate(15, 25)">
+                <polygon points="180,145 205,145 205,170 180,170" fill="#f59e0b" stroke="#fef3c7" stroke-width="1.5" />
+                <polygon points="205,145 218,136 218,161 205,170" fill="#d97706" stroke="#fef3c7" stroke-width="1.5" />
+                <polygon points="180,145 193,136 218,136 205,145" fill="#fbbf24" stroke="#fef3c7" stroke-width="1.5" />
+                <text x="172" y="185" fill="#fbbf24" font-weight="bold" font-size="11">Kubus (s = 2)</text>
+              </g>
+
+              <text x="105" y="195" fill="#e2e8f0" font-weight="bold" font-size="12">Balok (15 × 10 × 8)</text>
+            </svg>
+          `;
+        }
+
+        case "tabung": {
+          const r = 55, h = 110;
+          const cx = 150, cy = 190;
+          const ry = r * 0.35;
+
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="cyl-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#312e81" />
+                  <stop offset="30%" stop-color="#4f46e5" />
+                  <stop offset="70%" stop-color="#818cf8" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+                <linearGradient id="top-ellipse" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#c084fc" />
+                  <stop offset="100%" stop-color="#6366f1" />
+                </linearGradient>
+              </defs>
+
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 0 ${cx + r} ${cy}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" fill="none" />
+              <path d="M ${cx - r} ${cy} L ${cx - r} ${cy - h} A ${r} ${ry} 0 0 0 ${cx + r} ${cy - h} L ${cx + r} ${cy} A ${r} ${ry} 0 0 1 ${cx - r} ${cy}" fill="url(#cyl-grad)" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <ellipse cx="${cx}" cy="${cy - h}" rx="${r}" ry="${ry}" fill="url(#top-ellipse)" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+
+              <line x1="${cx - r - 18}" y1="${cy - h}" x2="${cx - r - 18}" y2="${cy}" stroke="#f59e0b" stroke-width="1.5" />
+              <line x1="${cx - r - 23}" y1="${cy - h}" x2="${cx - r - 13}" y2="${cy - h}" stroke="#f59e0b" stroke-width="1.5" />
+              <line x1="${cx - r - 23}" y1="${cy}" x2="${cx - r - 13}" y2="${cy}" stroke="#f59e0b" stroke-width="1.5" />
+              <text x="${cx - r - 35}" y="${cy - h/2 + 5}" fill="#fbbf24" font-weight="bold" font-size="14">t</text>
+              
+              <line x1="${cx}" y1="${cy - h}" x2="${cx + r}" y2="${cy - h}" stroke="#f59e0b" stroke-width="2" />
+              <circle cx="${cx}" cy="${cy - h}" r="3" fill="#fbbf24" />
+              <text x="${cx + r/2 - 4}" y="${cy - h - 8}" fill="#fbbf24" font-weight="bold" font-size="14">r</text>
+            </svg>
+          `;
+        }
+
+        case "tabung_tanpa_tutup": {
+          // Soal 35: Tabung tanpa tutup (bagian atas terbuka menampilkan dinding dalam)
+          const r = 55, h = 115;
+          const cx = 150, cy = 190;
+          const ry = r * 0.35;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="cyl-open-outer" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#312e81" />
+                  <stop offset="50%" stop-color="#4f46e5" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+                <linearGradient id="cyl-open-inner" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#0f172a" />
+                  <stop offset="100%" stop-color="#1e293b" />
+                </linearGradient>
+              </defs>
+              <!-- Lubang Atas Terbuka -->
+              <ellipse cx="${cx}" cy="${cy - h}" rx="${r}" ry="${ry}" fill="url(#cyl-open-inner)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Dinding Luar -->
+              <path d="M ${cx - r} ${cy - h} A ${r} ${ry} 0 0 0 ${cx + r} ${cy - h} L ${cx + r} ${cy} A ${r} ${ry} 0 0 1 ${cx - r} ${cy} Z" fill="url(#cyl-open-outer)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Alas Bawah (dashed) -->
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 1 ${cx + r} ${cy}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" fill="none" />
+              
+              <text x="${cx - 32}" y="${cy - h - 22}" fill="#38bdf8" font-weight="bold" font-size="11">Tanpa Tutup</text>
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="${cx}" cy="${cy}" r="3" fill="#fbbf24" />
+              <text x="${cx + r/2 - 4}" y="${cy + 16}" fill="#fbbf24" font-weight="bold" font-size="13">r</text>
+              <text x="${cx + r + 12}" y="${cy - h/2}" fill="#fbbf24" font-weight="bold" font-size="13">t</text>
+            </svg>
+          `;
+        }
+
+        case "pipa_berongga": {
+          // Soal 25 & 39: Pipa / Cincin Berongga (R luar, r dalam)
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="pipe-outer" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#334155" />
+                  <stop offset="40%" stop-color="#64748b" />
+                  <stop offset="80%" stop-color="#94a3b8" />
+                  <stop offset="100%" stop-color="#1e293b" />
+                </linearGradient>
+              </defs>
+              <!-- Badan Pipa Luar -->
+              <path d="M 85 75 L 85 185 A 65 22 0 0 0 215 185 L 215 75 Z" fill="url(#pipe-outer)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Cincin Atas Luar -->
+              <ellipse cx="150" cy="75" rx="65" ry="22" fill="#cbd5e1" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Rongga Lubang Dalam -->
+              <ellipse cx="150" cy="75" rx="42" ry="14" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5" />
+              <!-- Garis Rongga Dalam (dashed) -->
+              <line x1="108" y1="75" x2="108" y2="185" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,4" />
+              <line x1="192" y1="75" x2="192" y2="185" stroke="#94a3b8" stroke-width="1.2" stroke-dasharray="4,4" />
+              
+              <!-- Label R dan r -->
+              <line x1="150" y1="75" x2="215" y2="75" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="150" cy="75" r="2.5" fill="#fbbf24" />
+              <text x="195" y="67" fill="#fbbf24" font-weight="bold" font-size="13">R</text>
+              <line x1="150" y1="75" x2="112" y2="82" stroke="#38bdf8" stroke-width="1.5" />
+              <text x="122" y="72" fill="#38bdf8" font-weight="bold" font-size="12">r</text>
+              <text x="224" y="135" fill="#fbbf24" font-weight="bold" font-size="13">t</text>
+            </svg>
+          `;
+        }
+
+        case "tabung_kelereng": {
+          // Soal 27: Tabung berisi air dan kelereng tenggelam
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Dinding Tabung -->
+              <path d="M 95 55 L 95 190 A 55 16 0 0 0 205 190 L 205 55" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              <ellipse cx="150" cy="55" rx="55" ry="16" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              
+              <!-- Air di Tabung -->
+              <path d="M 95 105 L 95 190 A 55 16 0 0 0 205 190 L 205 105 Z" fill="#0284c7" opacity="0.55" />
+              <ellipse cx="150" cy="105" rx="55" ry="16" fill="#38bdf8" opacity="0.6" stroke="#7dd3fc" stroke-width="1.5" />
+              <!-- Garis Permukaan Air Awal -->
+              <path d="M 95 125 A 55 16 0 0 0 205 125" fill="none" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,3" />
+              
+              <!-- Kelereng-kelereng di Dasar -->
+              <circle cx="122" cy="182" r="9" fill="#94a3b8" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="142" cy="185" r="9" fill="#cbd5e1" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="162" cy="184" r="9" fill="#94a3b8" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="180" cy="181" r="9" fill="#cbd5e1" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="132" cy="171" r="9" fill="#e2e8f0" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="155" cy="172" r="9" fill="#94a3b8" stroke="#f8fafc" stroke-width="1" />
+              <circle cx="171" cy="170" r="9" fill="#cbd5e1" stroke="#f8fafc" stroke-width="1" />
+
+              <!-- Indikator Kenaikan Δt -->
+              <line x1="215" y1="105" x2="215" y2="125" stroke="#fbbf24" stroke-width="2" />
+              <text x="222" y="119" fill="#fbbf24" font-weight="bold" font-size="13">Δt</text>
+              <text x="142" y="48" fill="#38bdf8" font-weight="bold" font-size="12">R = 6</text>
+            </svg>
+          `;
+        }
+
+        case "kerucut": {
+          const r = 55, h = 115;
+          const cx = 150, cy = 190;
+          const ry = r * 0.35;
+
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="cone-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1e1b4b" />
+                  <stop offset="40%" stop-color="#6366f1" />
+                  <stop offset="85%" stop-color="#c084fc" />
+                  <stop offset="100%" stop-color="#4c1d95" />
+                </linearGradient>
+              </defs>
+
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 0 ${cx + r} ${cy}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" fill="none" />
+              <path d="M ${cx - r} ${cy} L ${cx} ${cy - h} L ${cx + r} ${cy} A ${r} ${ry} 0 0 1 ${cx - r} ${cy}" fill="url(#cone-grad)" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy - h}" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,3" />
+
+              <text x="${cx - 14}" y="${cy - h/2}" fill="#38bdf8" font-weight="bold" font-size="14">t</text>
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#f59e0b" stroke-width="2" />
+              <circle cx="${cx}" cy="${cy}" r="3" fill="#fbbf24" />
+              <text x="${cx + r/2 - 4}" y="${cy + 16}" fill="#fbbf24" font-weight="bold" font-size="14">r</text>
+              <text x="${(cx + cx + r)/2 + 10}" y="${(cy + cy - h)/2 - 4}" fill="#fbbf24" font-weight="bold" font-size="14">s</text>
+            </svg>
+          `;
+        }
+
+        case "kerucut_terbalik": {
+          // Soal 13: Wadah kerucut terbalik berisi air
+          const r = 60, h = 120;
+          const cx = 150, cy = 65;
+          const ry = 18;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="inv-cone-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#0369a1" />
+                  <stop offset="50%" stop-color="#0284c7" />
+                  <stop offset="100%" stop-color="#0c4a6e" />
+                </linearGradient>
+              </defs>
+              <!-- Badan Kerucut Terbalik -->
+              <path d="M ${cx - r} ${cy} L ${cx} ${cy + h} L ${cx + r} ${cy} Z" fill="url(#inv-cone-grad)" opacity="0.85" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Permukaan Air Atas -->
+              <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${ry}" fill="#38bdf8" opacity="0.85" stroke="#bae6fd" stroke-width="2" />
+              <!-- Garis Tinggi t -->
+              <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy + h}" stroke="#f8fafc" stroke-width="1.5" stroke-dasharray="4,3" />
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="${cx}" cy="${cy}" r="3" fill="#fbbf24" />
+              
+              <text x="${cx + r/2 - 4}" y="${cy - 8}" fill="#fbbf24" font-weight="bold" font-size="13">r = 10</text>
+              <text x="${cx + 8}" y="${cy + h/2}" fill="#ffffff" font-weight="bold" font-size="14">t = ?</text>
+            </svg>
+          `;
+        }
+
+        case "potongan_kerucut": {
+          // Soal 18: Kerucut terpancung dengan r1, r2, dan t
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="frustum-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#312e81" />
+                  <stop offset="50%" stop-color="#4f46e5" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+              </defs>
+              <path d="M 110 80 L 70 185 A 80 20 0 0 0 230 185 L 190 80 Z" fill="url(#frustum-grad)" stroke="${strokeColor}" stroke-width="2" />
+              <ellipse cx="150" cy="80" rx="40" ry="11" fill="#818cf8" stroke="${strokeColor}" stroke-width="2" />
+              <path d="M 70 185 A 80 20 0 0 1 230 185" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,4" fill="none" />
+              
+              <!-- Garis Dimensi r1, r2, t -->
+              <line x1="150" y1="80" x2="190" y2="80" stroke="#fbbf24" stroke-width="2" />
+              <text x="162" y="72" fill="#fbbf24" font-weight="bold" font-size="12">r₁</text>
+              
+              <line x1="150" y1="185" x2="230" y2="185" stroke="#fbbf24" stroke-width="2" />
+              <text x="185" y="178" fill="#fbbf24" font-weight="bold" font-size="12">r₂</text>
+              
+              <line x1="150" y1="80" x2="150" y2="185" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,3" />
+              <text x="136" y="138" fill="#38bdf8" font-weight="bold" font-size="13">t</text>
+            </svg>
+          `;
+        }
+
+        case "bola":
+        case "bola_diameter": {
+          const r = 75;
+          const cx = 150, cy = 125;
+          const ry = r * 0.28;
+          const isDiam = (type === "bola_diameter");
+
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="sphere-grad" cx="30%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="50%" stop-color="#0369a1" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </radialGradient>
+              </defs>
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#sphere-grad)" stroke="${strokeColor}" stroke-width="${strokeWidth}" />
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 0 ${cx + r} ${cy}" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,4" fill="none" />
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 1 ${cx + r} ${cy}" stroke="${strokeColor}" stroke-width="1.5" opacity="0.6" fill="none" />
+              
+              ${isDiam ? `
+                <line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2.5" />
+                <circle cx="${cx}" cy="${cy}" r="3.5" fill="#fbbf24" />
+                <text x="${cx - 12}" y="${cy - 10}" fill="#fbbf24" font-weight="bold" font-size="14">d = 2r</text>
+              ` : `
+                <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2.5" />
+                <circle cx="${cx}" cy="${cy}" r="4" fill="#fbbf24" />
+                <text x="${cx + r/2 - 4}" y="${cy - 8}" fill="#fbbf24" font-weight="bold" font-size="14">r</text>
+              `}
+            </svg>
+          `;
+        }
+
+        case "setengah_bola": {
+          // Soal 22: Kubah setengah bola (diameter 28 m)
+          const r = 80;
+          const cx = 150, cy = 155;
+          const ry = 24;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="dome-grad" cx="35%" cy="25%" r="70%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="60%" stop-color="#0284c7" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </radialGradient>
+              </defs>
+              <!-- Kubah Setengah Bola -->
+              <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} A ${r} ${ry} 0 0 1 ${cx - r} ${cy} Z" fill="url(#dome-grad)" stroke="${strokeColor}" stroke-width="2" />
+              <path d="M ${cx - r} ${cy} A ${r} ${ry} 0 0 0 ${cx + r} ${cy}" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" fill="none" />
+              
+              <!-- Garis Diameter & Jari-jari -->
+              <line x1="${cx - r}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2" />
+              <circle cx="${cx}" cy="${cy}" r="3.5" fill="#fbbf24" />
+              <text x="${cx - 25}" y="${cy + 28}" fill="#fbbf24" font-weight="bold" font-size="13">d = 28 m</text>
+              <text x="${cx + 32}" y="${cy - 6}" fill="#fef08a" font-weight="bold" font-size="12">r = 14 m</text>
+            </svg>
+          `;
+        }
+
+        case "enam_bola_tenis": {
+          // Soal 36: 6 buah bola tenis
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="tennis-grad" cx="30%" cy="30%" r="70%">
+                  <stop offset="0%" stop-color="#bef264" />
+                  <stop offset="65%" stop-color="#65a30d" />
+                  <stop offset="100%" stop-color="#365314" />
+                </radialGradient>
+              </defs>
+              ${[
+                [85, 90], [150, 90], [215, 90],
+                [85, 160], [150, 160], [215, 160]
+              ].map(([x, y]) => `
+                <g>
+                  <circle cx="${x}" cy="${y}" r="26" fill="url(#tennis-grad)" stroke="#ecfccb" stroke-width="1.5" />
+                  <path d="M ${x - 18} ${y - 18} Q ${x} ${y} ${x - 18} ${y + 18}" fill="none" stroke="#f7fee7" stroke-width="1.5" />
+                  <path d="M ${x + 18} ${y - 18} Q ${x} ${y} ${x + 18} ${y + 18}" fill="none" stroke="#f7fee7" stroke-width="1.5" />
+                </g>
+              `).join("")}
+              <text x="88" y="212" fill="#bef264" font-weight="bold" font-size="13">6 Bola Tenis (d = 7 cm)</text>
+            </svg>
+          `;
+        }
+
+        case "limas": {
+          // SVG Limas Segiempat sesuai permintaan user
+          return `
+            <svg class="w-full max-w-[230px] h-auto drop-shadow-xl" viewBox="0 0 200 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="limasGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#c084fc" stop-opacity="0.9"></stop>
+                  <stop offset="100%" stop-color="#7c3aed" stop-opacity="0.5"></stop>
+                </linearGradient>
+              </defs>
+              <!-- Garis tersembunyi belakang (dashed) -->
+              <polyline points="60,140 140,140" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" fill="none"></polyline>
+              <line x1="60" y1="140" x2="30" y2="180" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"></line>
+              <line x1="100" y1="30" x2="60" y2="140" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"></line>
+              
+              <!-- Tinggi limas (t) -->
+              <line x1="100" y1="30" x2="100" y2="160" stroke="#38bdf8" stroke-width="1.8" stroke-dasharray="3"></line>
+              
+              <!-- Alas Limas Segi Empat -->
+              <polygon points="30,180 110,180 140,140 60,140" fill="url(#limasGrad)" opacity="0.25"></polygon>
+              
+              <!-- Sisi Segitiga Selimut Depan -->
+              <polygon points="100,30 30,180 110,180" fill="url(#limasGrad)" opacity="0.45" stroke="#a855f7" stroke-width="2"></polygon>
+              <polygon points="100,30 110,180 140,140" fill="url(#limasGrad)" opacity="0.65" stroke="#a855f7" stroke-width="2"></polygon>
+              
+              <!-- Garis Tinggi Selimut (hs) -->
+              <line x1="100" y1="30" x2="125" y2="160" stroke="#f472b6" stroke-width="1.8" stroke-dasharray="3"></line>
+              <circle cx="125" cy="160" r="2.5" fill="#f472b6"></circle>
+
+              <!-- Label Dimensi (Warna terang agar kontras di latar gelap) -->
+              <text x="86" y="102" fill="#38bdf8" font-size="12" font-weight="bold">t</text>
+              <text x="122" y="95" fill="#f472b6" font-size="12" font-weight="bold">hₛ</text>
+              <text x="42" y="198" fill="#fbbf24" font-size="11" font-weight="bold">s (sisi alas)</text>
+            </svg>
+          `;
+        }
+
+        case "prisma": {
+          // SVG Prisma Segitiga sesuai permintaan user (tanpa tag MathJax rusak)
+          return `
+            <svg class="w-full max-w-[230px] h-auto drop-shadow-xl" viewBox="0 0 210 220" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="prismaGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#818cf8" stop-opacity="0.85"></stop>
+                  <stop offset="100%" stop-color="#4f46e5" stop-opacity="0.65"></stop>
+                </linearGradient>
+              </defs>
+              <!-- Sisi belakang / tersembunyi (dashed) -->
+              <polyline points="75,150 135,120" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4" fill="none"></polyline>
+              <line x1="75" y1="150" x2="75" y2="50" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4"></line>
+              
+              <!-- Alas Bawah -->
+              <polygon points="35,180 135,120 155,180" fill="url(#prismaGrad)" opacity="0.35"></polygon>
+              <polyline points="35,180 75,150 155,180" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4" fill="none"></polyline>
+              <polyline points="35,180 135,120 155,180" stroke="#38bdf8" stroke-width="2" fill="none"></polyline>
+              
+              <!-- Sisi Tegak Selubung -->
+              <line x1="35" y1="180" x2="35" y2="80" stroke="#38bdf8" stroke-width="2"></line>
+              <line x1="135" y1="120" x2="135" y2="20" stroke="#38bdf8" stroke-width="2"></line>
+              <line x1="155" y1="180" x2="155" y2="80" stroke="#38bdf8" stroke-width="2"></line>
+              
+              <!-- Tutup Atas -->
+              <polygon points="35,80 135,20 155,80" fill="url(#prismaGrad)" opacity="0.65"></polygon>
+              <polygon points="35,80 135,20 155,80" stroke="#38bdf8" stroke-width="2" fill="none"></polygon>
+              <polyline points="35,80 75,50 155,80" stroke="#818cf8" stroke-width="1.5" stroke-dasharray="4" fill="none"></polyline>
+
+              <!-- Label Dimensi -->
+              <text x="6" y="134" fill="#fbbf24" font-size="11" font-weight="bold">t (tinggi)</text>
+              <line x1="25" y1="80" x2="25" y2="180" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="3"></line>
+              <polygon points="25,80 23,85 27,85" fill="#fbbf24"></polygon>
+              <polygon points="25,180 23,175 27,175" fill="#fbbf24"></polygon>
+
+              <!-- Label Alas & Tutup -->
+              <text x="58" y="202" fill="#e0e7ff" font-size="11" font-weight="bold">Alas Segitiga (Lₐ)</text>
+              <text x="82" y="13" fill="#e0e7ff" font-size="11" font-weight="bold">Tutup Atas</text>
+            </svg>
+          `;
+        }
+
+        case "tenda_prisma": {
+          // Soal 28: Tenda prisma segitiga tidur
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Bagian Belakang -->
+              <polygon points="150,55 105,145 195,145" fill="#312e81" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,3" />
+              <!-- Sisi Samping Kanan -->
+              <polygon points="105,85 150,55 195,145 150,175" fill="#4338ca" opacity="0.85" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Alas Bawah -->
+              <polygon points="60,175 150,175 195,145 105,145" fill="#1e1b4b" opacity="0.6" stroke="${strokeColor}" stroke-width="1.5" />
+              <!-- Pintu Segitiga Depan -->
+              <polygon points="105,85 60,175 150,175" fill="#6366f1" opacity="0.9" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Tinggi Segitiga -->
+              <line x1="105" y1="85" x2="105" y2="175" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,3" />
+              
+              <text x="110" y="140" fill="#fbbf24" font-weight="bold" font-size="11">t = 4m</text>
+              <text x="88" y="192" fill="#fbbf24" font-weight="bold" font-size="12">alas = 6m</text>
+              <text x="176" y="170" fill="#38bdf8" font-weight="bold" font-size="12">p = 5m</text>
+            </svg>
+          `;
+        }
+
+        case "prisma_belah_ketupat": {
+          // Soal 33: Prisma tegak beralas belah ketupat
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Garis Belakang -->
+              <line x1="150" y1="45" x2="150" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="90" y1="175" x2="150" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="210" y1="175" x2="150" y2="145" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" />
+              
+              <!-- Sisi Tegak Depan -->
+              <polygon points="90,75 150,105 150,205 90,175" fill="#4f46e5" opacity="0.8" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="150,105 210,75 210,175 150,205" fill="#312e81" opacity="0.9" stroke="${strokeColor}" stroke-width="2" />
+              
+              <!-- Tutup Belah Ketupat -->
+              <polygon points="150,45 210,75 150,105 90,75" fill="#818cf8" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Diagonal Belah Ketupat -->
+              <line x1="90" y1="75" x2="210" y2="75" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2" />
+              <line x1="150" y1="45" x2="150" y2="105" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2" />
+              
+              <text x="165" y="70" fill="#fef08a" font-weight="bold" font-size="11">d₁, d₂</text>
+              <text x="218" y="132" fill="#fbbf24" font-weight="bold" font-size="13">t = 15</text>
+            </svg>
+          `;
+        }
+
+        case "tetrahedron": {
+          // Soal 38: Limas segitiga beraturan (Tetrahedron)
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Rusuk Belakang (dashed) -->
+              <line x1="75" y1="175" x2="215" y2="150" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="4,4" />
+              
+              <!-- Dua Sisi Depan -->
+              <polygon points="150,45 75,175 160,195" fill="#6366f1" opacity="0.75" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="150,45 160,195 215,150" fill="#4338ca" opacity="0.85" stroke="${strokeColor}" stroke-width="2" />
+              
+              <text x="102" y="198" fill="#fbbf24" font-weight="bold" font-size="13">s</text>
+              <text x="192" y="182" fill="#fbbf24" font-weight="bold" font-size="13">s</text>
+              <text x="98" y="108" fill="#fbbf24" font-weight="bold" font-size="13">s</text>
+              <text x="115" y="220" fill="#cbd5e1" font-weight="bold" font-size="11">Semua rusuk = s</text>
+            </svg>
+          `;
+        }
+
+        case "gabungan_kubus_balok": {
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="main-cube" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#4f46e5" />
+                  <stop offset="100%" stop-color="#312e81" />
+                </linearGradient>
+                <linearGradient id="stacked-block" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#06b6d4" />
+                  <stop offset="100%" stop-color="#0891b2" />
+                </linearGradient>
+              </defs>
+              <!-- Balok Bawah -->
+              <rect x="65" y="135" width="155" height="65" fill="url(#main-cube)" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="65,135 90,115 245,115 220,135" fill="#6366f1" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="220,135 245,115 245,180 220,200" fill="#1e1b4b" stroke="${strokeColor}" stroke-width="2" />
+              
+              <!-- Kubus Atas -->
+              <rect x="115" y="65" width="60" height="60" fill="url(#stacked-block)" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="115,65 135,48 195,48 175,65" fill="#22d3ee" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="175,65 195,48 195,108 175,125" fill="#0e7490" stroke="${strokeColor}" stroke-width="2" />
+              
+              <text x="124" y="100" fill="#ffffff" font-weight="extrabold" font-size="12">KUBUS</text>
+              <text x="95" y="173" fill="#ffffff" font-weight="extrabold" font-size="12">BALOK BAWAH</text>
+            </svg>
+          `;
+        }
+
+        case "gabungan_kapsul": {
+          // Soal 16: Tabung dengan belahan setengah bola di salah satu ujungnya
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="capsule-cyl" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#818cf8" />
+                  <stop offset="50%" stop-color="#4f46e5" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+                <radialGradient id="sphere-half" cx="35%" cy="35%" r="65%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="100%" stop-color="#0369a1" />
+                </radialGradient>
+              </defs>
+              <!-- Belahan Setengah Bola Kiri -->
+              <path d="M 105 90 A 35 35 0 0 0 105 160 Z" fill="url(#sphere-half)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Badan Tabung -->
+              <rect x="105" y="90" width="115" height="70" fill="url(#capsule-cyl)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Tutup Kanan Tabung -->
+              <ellipse cx="220" cy="125" rx="12" ry="35" fill="#6366f1" stroke="${strokeColor}" stroke-width="2" />
+              
+              <line x1="105" y1="125" x2="105" y2="90" stroke="#fbbf24" stroke-width="2" />
+              <text x="92" y="112" fill="#fbbf24" font-weight="bold" font-size="12">r</text>
+              <line x1="105" y1="176" x2="220" y2="176" stroke="#fbbf24" stroke-width="1.5" />
+              <text x="155" y="192" fill="#fbbf24" font-weight="bold" font-size="13">t = 15</text>
+            </svg>
+          `;
+        }
+
+        case "gabungan_tenda": {
+          // Soal 17: Posko tabung beratapkan kerucut
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <path d="M 85 120 L 85 190 A 65 18 0 0 0 215 190 L 215 120 Z" fill="#312e81" stroke="${strokeColor}" stroke-width="2" />
+              <path d="M 85 120 L 150 45 L 215 120 A 65 18 0 0 1 85 120" fill="#4f46e5" stroke="${strokeColor}" stroke-width="2" />
+              <ellipse cx="150" cy="120" rx="65" ry="18" fill="#4338ca" opacity="0.6" stroke="${strokeColor}" stroke-width="1" />
+              
+              <line x1="150" y1="45" x2="150" y2="120" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="3,2" />
+              <text x="155" y="88" fill="#fbbf24" font-weight="bold" font-size="12">t₂</text>
+              <text x="222" y="160" fill="#fbbf24" font-weight="bold" font-size="12">t₁</text>
+              <line x1="150" y1="120" x2="215" y2="120" stroke="#38bdf8" stroke-width="1.5" />
+              <text x="178" y="114" fill="#38bdf8" font-weight="bold" font-size="12">r</text>
+            </svg>
+          `;
+        }
+
+        case "bola_dalam_tabung": {
+          // Soal 23: Bola menyinggung seluruh sisi tabung (t = 2r)
+          const r = 60;
+          const cx = 150, cy = 125;
+          const ry = 16;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="inscribed-sphere" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="65%" stop-color="#0284c7" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </radialGradient>
+              </defs>
+              <!-- Bola di Dalam -->
+              <circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#inscribed-sphere)" opacity="0.9" stroke="#7dd3fc" stroke-width="1.5" />
+              <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="14" fill="none" stroke="#bae6fd" stroke-width="1" stroke-dasharray="3,3" />
+              
+              <!-- Tabung Pembungkus -->
+              <ellipse cx="${cx}" cy="${cy - r}" rx="${r}" ry="${ry}" fill="none" stroke="#fbbf24" stroke-width="2" />
+              <path d="M ${cx - r} ${cy + r} A ${r} ${ry} 0 0 0 ${cx + r} ${cy + r}" fill="none" stroke="#fbbf24" stroke-width="2" />
+              <path d="M ${cx - r} ${cy + r} A ${r} ${ry} 0 0 1 ${cx + r} ${cy + r}" fill="none" stroke="#fbbf24" stroke-width="1" stroke-dasharray="3,3" />
+              <line x1="${cx - r}" y1="${cy - r}" x2="${cx - r}" y2="${cy + r}" stroke="#fbbf24" stroke-width="2" />
+              <line x1="${cx + r}" y1="${cy - r}" x2="${cx + r}" y2="${cy + r}" stroke="#fbbf24" stroke-width="2" />
+              
+              <text x="${cx + r + 10}" y="${cy + 4}" fill="#fbbf24" font-weight="bold" font-size="12">t = 2r</text>
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#ffffff" stroke-width="1.5" />
+              <text x="${cx + 25}" y="${cy - 6}" fill="#ffffff" font-weight="bold" font-size="12">r</text>
+            </svg>
+          `;
+        }
+
+        case "es_krim_cone": {
+          // Soal 24: Kerucut es krim di bawah + setengah bola di atas
+          const r = 52, h = 105;
+          const cx = 150, cy = 105;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="scoop-grad" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#f472b6" />
+                  <stop offset="100%" stop-color="#be185d" />
+                </radialGradient>
+                <linearGradient id="cone-wafer" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#d97706" />
+                  <stop offset="50%" stop-color="#f59e0b" />
+                  <stop offset="100%" stop-color="#92400e" />
+                </linearGradient>
+              </defs>
+              <!-- Kerucut Cone Bawah -->
+              <path d="M ${cx - r} ${cy} L ${cx} ${cy + h} L ${cx + r} ${cy} Z" fill="url(#cone-wafer)" stroke="#fef3c7" stroke-width="1.8" />
+              <!-- Setengah Bola Es Krim Atas -->
+              <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy} A ${r} 14 0 0 1 ${cx - r} ${cy} Z" fill="url(#scoop-grad)" stroke="#fbcfe8" stroke-width="1.8" />
+              
+              <!-- Dimensi r dan t -->
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#ffffff" stroke-width="2" />
+              <text x="${cx + 20}" y="${cy - 6}" fill="#ffffff" font-weight="bold" font-size="12">r = 6</text>
+              <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy + h}" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="3,2" />
+              <text x="${cx + 6}" y="${cy + 58}" fill="#fef08a" font-weight="bold" font-size="12">t = 15</text>
+            </svg>
+          `;
+        }
+
+        case "transfer_setengah_bola_tabung": {
+          // Soal 31: Transfer cairan dari setengah bola ke tabung berjari-jari sama
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Setengah Bola Kiri -->
+              <path d="M 35 120 A 45 45 0 0 0 125 120 Z" fill="#0284c7" stroke="#38bdf8" stroke-width="2" />
+              <ellipse cx="80" cy="120" rx="45" ry="12" fill="#38bdf8" opacity="0.8" stroke="#bae6fd" stroke-width="1.5" />
+              <text x="68" y="182" fill="#cbd5e1" font-weight="bold" font-size="11">1/2 Bola (r)</text>
+              
+              <!-- Panah Transfer -->
+              <path d="M 135 125 L 160 125" stroke="#fbbf24" stroke-width="2.5" />
+              <polygon points="165,125 157,120 157,130" fill="#fbbf24" />
+              
+              <!-- Tabung Kanan -->
+              <path d="M 175 65 L 175 165 A 45 12 0 0 0 265 165 L 265 65" fill="none" stroke="#38bdf8" stroke-width="2" />
+              <ellipse cx="220" cy="65" rx="45" ry="12" fill="none" stroke="#38bdf8" stroke-width="2" />
+              <!-- Air di Tabung -->
+              <path d="M 175 105 L 175 165 A 45 12 0 0 0 265 165 L 265 105 Z" fill="#0284c7" opacity="0.75" />
+              <ellipse cx="220" cy="105" rx="45" ry="12" fill="#38bdf8" opacity="0.85" stroke="#bae6fd" stroke-width="1.5" />
+              
+              <text x="270" y="140" fill="#fbbf24" font-weight="bold" font-size="13">h</text>
+              <text x="190" y="185" fill="#cbd5e1" font-weight="bold" font-size="11">Tabung (r)</text>
+            </svg>
+          `;
+        }
+
+        case "akuarium_kubus_logam": {
+          // Soal 32: Akuarium balok dengan 4 kubus logam di dasar
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <!-- Akuarium Balok -->
+              <polygon points="55,60 100,38 245,38 200,60" fill="none" stroke="#94a3b8" stroke-width="1.5" />
+              <line x1="100" y1="38" x2="100" y2="165" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" />
+              <line x1="100" y1="165" x2="55" y2="188" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" />
+              <line x1="100" y1="165" x2="245" y2="165" stroke="#475569" stroke-width="1.2" stroke-dasharray="4,4" />
+
+              <!-- Air Akuarium -->
+              <polygon points="55,112 200,112 200,188 55,188" fill="#0284c7" opacity="0.45" />
+              <polygon points="200,112 245,90 245,165 200,188" fill="#0369a1" opacity="0.55" />
+              <polygon points="55,112 100,90 245,90 200,112" fill="#38bdf8" opacity="0.55" stroke="#7dd3fc" stroke-width="1.5" />
+
+              <!-- 4 Kubus Logam di Dasar -->
+              ${[72, 102, 132, 162].map(x => `
+                <g>
+                  <rect x="${x}" y="164" width="22" height="22" fill="#94a3b8" stroke="#f8fafc" stroke-width="1" />
+                  <polygon points="${x},164 ${x+7},158 ${x+29},158 ${x+22},164" fill="#cbd5e1" stroke="#f8fafc" stroke-width="1" />
+                  <polygon points="${x+22},164 ${x+29},158 ${x+29},180 ${x+22},186" fill="#64748b" stroke="#f8fafc" stroke-width="1" />
+                </g>
+              `).join("")}
+
+              <!-- Rangka Depan Akuarium -->
+              <polygon points="55,60 200,60 200,188 55,188" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              <polygon points="200,60 245,38 245,165 200,188" fill="none" stroke="${strokeColor}" stroke-width="2" />
+              
+              <text x="82" y="206" fill="#fbbf24" font-weight="bold" font-size="11">4 Kubus Logam (s = 10 cm)</text>
+            </svg>
+          `;
+        }
+
+        case "bola_dalam_kubus": {
+          // Soal 34: Bola menyinggung keenam sisi dalam kubus
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <radialGradient id="cube-sphere" cx="35%" cy="30%" r="65%">
+                  <stop offset="0%" stop-color="#38bdf8" />
+                  <stop offset="65%" stop-color="#0284c7" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </radialGradient>
+              </defs>
+              <!-- Kubus Belakang -->
+              <rect x="115" y="45" width="110" height="110" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="75" y1="80" x2="115" y2="45" stroke="#fbbf24" stroke-width="1.5" />
+              <line x1="185" y1="80" x2="225" y2="45" stroke="#fbbf24" stroke-width="1.5" />
+              <line x1="75" y1="190" x2="115" y2="155" stroke="#64748b" stroke-width="1.5" stroke-dasharray="4,4" />
+              <line x1="185" y1="190" x2="225" y2="155" stroke="#fbbf24" stroke-width="1.5" />
+
+              <!-- Bola di Dalam Kubus -->
+              <circle cx="150" cy="118" r="56" fill="url(#cube-sphere)" opacity="0.9" stroke="#7dd3fc" stroke-width="1.5" />
+              <ellipse cx="150" cy="118" rx="56" ry="15" fill="none" stroke="#bae6fd" stroke-width="1" stroke-dasharray="3,3" />
+
+              <!-- Kubus Depan -->
+              <rect x="75" y="80" width="110" height="110" fill="none" stroke="#fbbf24" stroke-width="2" />
+              <text x="125" y="208" fill="#fbbf24" font-weight="bold" font-size="13">Kubus (s)</text>
+            </svg>
+          `;
+        }
+
+        case "bikerucut": {
+          // Soal 40: Dua kerucut berhimpit alas (atas tinggi 15, bawah tinggi 6)
+          const r = 65;
+          const cx = 150, cy = 145;
+          return `
+            <svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto drop-shadow-2xl">
+              <defs>
+                <linearGradient id="top-cone-bi" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#312e81" />
+                  <stop offset="50%" stop-color="#6366f1" />
+                  <stop offset="100%" stop-color="#1e1b4b" />
+                </linearGradient>
+                <linearGradient id="bot-cone-bi" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1e1b4b" />
+                  <stop offset="50%" stop-color="#4338ca" />
+                  <stop offset="100%" stop-color="#0f172a" />
+                </linearGradient>
+              </defs>
+              <!-- Kerucut Bawah (lebih pendek, t = 6) -->
+              <path d="M ${cx - r} ${cy} L ${cx} ${cy + 55} L ${cx + r} ${cy} Z" fill="url(#bot-cone-bi)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Kerucut Atas (lebih tinggi, t = 15) -->
+              <path d="M ${cx - r} ${cy} L ${cx} ${cy - 105} L ${cx + r} ${cy} A ${r} 16 0 0 1 ${cx - r} ${cy}" fill="url(#top-cone-bi)" stroke="${strokeColor}" stroke-width="2" />
+              <!-- Alas Lingkaran Tengah Berhimpit -->
+              <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="16" fill="#818cf8" opacity="0.35" stroke="#a5b4fc" stroke-width="1.2" stroke-dasharray="4,3" />
+              
+              <!-- Label s1, s2, r -->
+              <line x1="${cx}" y1="${cy}" x2="${cx + r}" y2="${cy}" stroke="#fbbf24" stroke-width="2" />
+              <text x="${cx + 25}" y="${cy - 6}" fill="#fbbf24" font-weight="bold" font-size="12">r = 8</text>
+              <text x="${cx + 42}" y="${cy - 52}" fill="#38bdf8" font-weight="bold" font-size="13">s₁ = 17</text>
+              <text x="${cx + 40}" y="${cy + 36}" fill="#38bdf8" font-weight="bold" font-size="13">s₂ = 10</text>
+            </svg>
+          `;
+        }
+
+        default:
+          return `<svg viewBox="0 0 300 250" class="w-full max-w-[280px] h-auto"><circle cx="150" cy="125" r="50" fill="#4f46e5" /></svg>`;
+      }
+    }
+
+    // --- RENDER KATEX DI SELURUH CONTAINER ---
+    function renderMathInContainer(element) {
+      if (window.renderMathInElement) {
+        renderMathInElement(element, {
+          delimiters: [
+            { left: "$$", right: "$$", display: true },
+            { left: "$", right: "$", display: false }
+          ],
+          throwOnError: false
+        });
+      }
+    }
+
+    // --- RENDER THE CURRENT QUESTION ---
+    function renderQuestion() {
+      const q = questions[currentIdx];
+      
+      // Update badging & headers
+      shapeBadgeEl.textContent = q.category;
+      diffBadgeEl.textContent = q.difficulty;
+      illustrationCaptionEl.textContent = q.caption || "Garis dimensi menunjukkan variabel parameter pada soal.";
+      
+      // Difficulty color styles
+      if (q.difficulty === "Mudah") {
+        diffBadgeEl.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+      } else if (q.difficulty === "Sedang") {
+        diffBadgeEl.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20";
+      } else {
+        diffBadgeEl.className = "text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-500/10 text-rose-400 border border-rose-500/20";
+      }
+      
+      qNumEl.textContent = q.id;
+      
+      // Set teks soal dan petunjuk (akan dirender oleh KaTeX)
+      qTextEl.innerHTML = q.question;
+      hintBoxEl.innerHTML = q.hint;
+      hintBoxEl.classList.add("hidden");
+      
+      // Populate Option buttons
+      optionsContainer.innerHTML = "";
+      q.options.forEach((opt, idx) => {
+        const isSelected = userAnswers[currentIdx] === idx;
+        const btn = document.createElement("button");
+        btn.onclick = () => selectOption(idx);
+        
+        let borderClass = "border-slate-200 hover:border-slate-300 bg-white hover:bg-slate-50";
+        let iconHtml = `<span class="mono w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-500 mr-3 shrink-0">${String.fromCharCode(65 + idx)}</span>`;
+        
+        if (isSelected) {
+          borderClass = "border-indigo-500 bg-indigo-50/50 text-indigo-900 ring-2 ring-indigo-500/10";
+          iconHtml = `<span class="mono w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold mr-3 shrink-0">${String.fromCharCode(65 + idx)}</span>`;
+        }
+        
+        // Custom styling if already checked
+        const state = questionStates[currentIdx];
+        if (state === "correct" || state === "incorrect") {
+          btn.disabled = true;
+          if (idx === q.correctIndex) {
+            borderClass = "border-emerald-500 bg-emerald-50 text-emerald-900 ring-2 ring-emerald-500/20";
+            iconHtml = `<span class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold mr-3 shrink-0"><i class="fa-solid fa-check"></i></span>`;
+          } else if (isSelected && idx !== q.correctIndex) {
+            borderClass = "border-rose-500 bg-rose-50 text-rose-900 ring-2 ring-rose-500/20";
+            iconHtml = `<span class="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center font-bold mr-3 shrink-0"><i class="fa-solid fa-xmark"></i></span>`;
+          }
+        }
+
+        btn.className = `w-full text-left p-4 rounded-xl border transition duration-150 flex items-center font-medium ${borderClass}`;
+        btn.innerHTML = `
+          ${iconHtml}
+          <span class="text-sm sm:text-base">${opt}</span>
+        `;
+        optionsContainer.appendChild(btn);
+      });
+
+      // Render SVG Ilustrasi yang sesuai soal
+      svgDrawingArea.innerHTML = generateSVGMarkup(q.type);
+      
+      // Discussion/Pembahasan Visibility Check
+      const state = questionStates[currentIdx];
+      if (state === "correct" || state === "incorrect") {
+        pembahasanSection.classList.remove("hidden");
+        pembahasanContent.innerHTML = q.explanation;
+        answeredCheckedBadge.classList.remove("hidden");
+        answeredCheckedBadge.classList.add("flex");
+        btnCheck.disabled = true;
+      } else {
+        pembahasanSection.classList.add("hidden");
+        answeredCheckedBadge.classList.add("hidden");
+        answeredCheckedBadge.classList.remove("flex");
+        btnCheck.disabled = (userAnswers[currentIdx] === null);
+      }
+      
+      // Prev/Next action bar states
+      btnPrev.disabled = (currentIdx === 0);
+      btnNext.disabled = (currentIdx === 39);
+      
+      // Render KaTeX di area soal, petunjuk, opsi, dan pembahasan
+      renderMathInContainer(document.body);
+      
+      updateLeftGrid();
+    }
+
+    // --- OPTION SELECT ACTION ---
+    window.selectOption = function(idx) {
+      if (questionStates[currentIdx] === "correct" || questionStates[currentIdx] === "incorrect") return;
+      
+      userAnswers[currentIdx] = idx;
+      questionStates[currentIdx] = "selected";
+      
+      renderQuestion();
+      updateLeftGrid();
+      updateGlobalStatus();
+    };
+
+    // --- CHECK ANSWER ACTION ---
+    window.checkAnswer = function() {
+      const selected = userAnswers[currentIdx];
+      if (selected === null) return;
+      
+      const q = questions[currentIdx];
+      if (selected === q.correctIndex) {
+        questionStates[currentIdx] = "correct";
+      } else {
+        questionStates[currentIdx] = "incorrect";
+      }
+      
+      renderQuestion(); 
+      updateLeftGrid();
+      updateGlobalStatus();
+    };
+
+    // --- NAVIGATION ACTIONS ---
+    window.nextQuestion = function() {
+      if (currentIdx < 39) {
+        currentIdx++;
+        renderQuestion();
+      }
+    };
+
+    window.prevQuestion = function() {
+      if (currentIdx > 0) {
+        currentIdx--;
+        renderQuestion();
+      }
+    };
+
+    window.jumpToQuestion = function(idx) {
+      currentIdx = idx;
+      renderQuestion();
+    };
+
+    window.toggleHint = function() {
+      hintBoxEl.classList.toggle("hidden");
+      renderMathInContainer(hintBoxEl);
+    };
+
+    // --- GENERATE SIDEBAR NAVIGATION GRID ---
+    function setupLeftGrid() {
+      gridEl.innerHTML = "";
+      for (let i = 0; i < 40; i++) {
+        const btn = document.createElement("button");
+        btn.id = `tab-btn-${i}`;
+        btn.onclick = () => jumpToQuestion(i);
+        btn.className = `w-10 h-10 rounded-xl font-bold text-sm flex items-center justify-center transition duration-150 border`;
+        gridEl.appendChild(btn);
+      }
+      updateLeftGrid();
+    }
+
+    function updateLeftGrid() {
+      for (let i = 0; i < 40; i++) {
+        const btn = document.getElementById(`tab-btn-${i}`);
+        if (!btn) continue;
+        
+        btn.textContent = i + 1;
+        
+        let bgClass = "bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100";
+        
+        const state = questionStates[i];
+        if (state === "selected") {
+          bgClass = "bg-amber-400 text-slate-950 border-amber-500 ring-2 ring-amber-400/20";
+        } else if (state === "correct") {
+          bgClass = "bg-emerald-500 text-white border-emerald-600 shadow-md shadow-emerald-100";
+        } else if (state === "incorrect") {
+          bgClass = "bg-rose-500 text-white border-rose-600 shadow-md shadow-rose-100";
+        }
+
+        let outlineClass = "";
+        if (i === currentIdx) {
+          outlineClass = " ring-4 ring-indigo-500/30 scale-105 border-indigo-500 z-10 font-black";
+        }
+        
+        btn.className = `w-10 h-10 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center transition duration-150 border ${bgClass} ${outlineClass}`;
+      }
+    }
+
+    // --- GLOBAL STATISTICS & SCORE UPDATER ---
+    function updateGlobalStatus() {
+      let correctCount = 0;
+      let finishedCount = 0;
+      
+      questionStates.forEach(state => {
+        if (state === "correct" || state === "incorrect") finishedCount++;
+        if (state === "correct") correctCount++;
+      });
+      
+      scoreBadge.textContent = `${correctCount} / 40`;
+      
+      const percentage = Math.round((finishedCount / 40) * 100);
+      progressBarInner.style.width = `${percentage}%`;
+      progressPercentage.textContent = `${percentage}%`;
+    }
+
+    // --- CUSTOM MODAL RESET HANDLERS ---
+    window.openResetModal = function() {
+      resetModal.classList.remove("hidden");
+    };
+
+    window.closeResetModal = function() {
+      resetModal.classList.add("hidden");
+    };
+
+    window.confirmResetQuiz = function() {
+      currentIdx = 0;
+      userAnswers = Array(40).fill(null);
+      questionStates = Array(40).fill("unanswered");
+      
+      shuffleAllOptions();
+      closeResetModal();
+      
+      renderQuestion();
+      updateLeftGrid();
+      updateGlobalStatus();
+    };
+
+    // --- DYNAMIC OPTION SHUFFLING ON INIT (BALANCED & NON-PATTERNED) ---
+    function shuffleAllOptions() {
+      // Buat pool posisi kunci jawaban yang seimbang (10 untuk A, 10 untuk B, 10 untuk C, 10 untuk D)
+      let targetIndices = [];
+      for (let i = 0; i < 4; i++) {
+        for (let k = 0; k < 10; k++) {
+          targetIndices.push(i);
+        }
+      }
+
+      // Acak urutan pool menggunakan Fisher-Yates & cegah pengulangan posisi yang sama > 2x berturut-turut
+      let validSequence = false;
+      while (!validSequence) {
+        for (let i = targetIndices.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [targetIndices[i], targetIndices[j]] = [targetIndices[j], targetIndices[i]];
+        }
+        
+        validSequence = true;
+        for (let i = 2; i < targetIndices.length; i++) {
+          if (targetIndices[i] === targetIndices[i - 1] && targetIndices[i] === targetIndices[i - 2]) {
+            validSequence = false;
+            break;
+          }
+        }
+      }
+
+      // Terapkan posisi kunci jawaban target ke setiap soal dan acak pengecohnya
+      questions.forEach((q, qIdx) => {
+        const correctText = q.options[q.correctIndex];
+        const distractors = q.options.filter((_, idx) => idx !== q.correctIndex);
+
+        // Acak urutan pengecoh
+        for (let i = distractors.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [distractors[i], distractors[j]] = [distractors[j], distractors[i]];
+        }
+
+        const targetPos = targetIndices[qIdx];
+        const newOptions = [];
+        let dIdx = 0;
+
+        for (let pos = 0; pos < 4; pos++) {
+          if (pos === targetPos) {
+            newOptions.push(correctText);
+          } else {
+            newOptions.push(distractors[dIdx++]);
+          }
+        }
+
+        q.options = newOptions;
+        q.correctIndex = targetPos;
+      });
+    }
+
+    // --- INITIALIZATION ON WINDOW LOAD ---
+    window.onload = function() {
+      shuffleAllOptions();
+      setupLeftGrid();
+      renderQuestion();
+      updateGlobalStatus();
+    };
+  </script>
+</body>
+</html>
